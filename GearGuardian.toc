@@ -1,0 +1,29 @@
+## Interface: 20505
+## Title: GearGuardian
+## Notes: Guardian of your gear - checks enchants, gems, displays item level, GearScore, and compares gear for your spec
+## Author: Sluck
+## Version: 2.2
+## SavedVariables: GearGuardianDB
+## IconTexture: Interface/Addons/GearGuardian/icon
+## OptionalDependencies: LibStub, CallbackHandler-1.0, LibDetours-1.0, LibClassicInspector
+## X-Min-Interface-BCC: 20504
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDetours-1.0\LibDetours-1.0.lua
+Libs\LibClassicInspector\LibClassicInspector.lua
+
+core\init.lua
+core\helpers.lua
+core\config.lua
+
+modules\borders.lua
+modules\itemlevel.lua
+modules\enchants.lua
+modules\gearscore.lua
+modules\comparison.lua
+
+ui\config-panel.lua
+ui\tooltips.lua
+
+GearGuardian.lua

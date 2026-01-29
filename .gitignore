@@ -1,0 +1,50 @@
+# Development and working files
+.claude/
+*.backup
+*_old.lua
+*_old.*
+FIXES_APPLIED.txt
+
+# Old changelogs (we keep CHANGELOG.md)
+CHANGELOG_v2.1.txt
+CHANGELOG_v2.2.txt
+
+# Old descriptions
+Description_v2.1.txt
+
+# WoW SavedVariables (user data - never commit!)
+*.lua.bak
+SavedVariables/
+WTF/
+
+# Packaged addon files
+*.zip
+*.7z
+*.rar
+releases/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temp files
+*.tmp
+*.log
+*.cache
+
+# Windows
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# MacOS
+.AppleDouble
+.LSOverride
+._*
