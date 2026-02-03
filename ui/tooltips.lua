@@ -20,6 +20,15 @@ local function OnTooltipSetItem(tooltip)
     local _, itemLink = tooltip:GetItem()
     if not itemLink then return end
 
+    -- Check if item is usable by player first
+    local isUsable, reason = GG.IsItemUsableByPlayer(itemLink)
+    if not isUsable then
+        tooltip:AddLine(" ")
+        tooltip:AddLine("|cffff5555Not usable by your class|r")
+        tooltip:Show()
+        return
+    end
+
     local class, spec = GG.GetPlayerSpec()
 
     if not GG.StatWeights[class] or not GG.StatWeights[class][spec] then

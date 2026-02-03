@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Core Initialization
     Author: Sluck
-    Version: 2.2
+    Version: 2.3
 ]]--
 
 -- Create addon namespace
@@ -23,7 +23,7 @@ GG.CI = LibStub("LibClassicInspector")
 -- ============================================
 
 GG.addonName = addonName
-GG.version = "2.2"
+GG.version = "2.3"
 GG.inspectedUnit = nil  -- Track current inspected unit
 
 -- Spec check interval (in seconds)

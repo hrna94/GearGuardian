@@ -192,6 +192,8 @@ end
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("ADDON_LOADED")
 initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+initFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+initFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
 
 local initialized = false
 
@@ -199,6 +201,19 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == addonName then
         GG.InitializeConfig()
         self:UnregisterEvent("ADDON_LOADED")
+    elseif event == "PLAYER_EQUIPMENT_CHANGED" then
+        -- Clear caches when equipment changes (OPTIMIZATION)
+        if GG.ClearStatsCache then
+            GG.ClearStatsCache()
+        end
+        if GG.ClearEnchantGemCache then
+            GG.ClearEnchantGemCache()
+        end
+    elseif event == "PLAYER_TALENT_UPDATE" then
+        -- Clear spec cache when talents change (OPTIMIZATION)
+        if GG.ClearSpecCache then
+            GG.ClearSpecCache()
+        end
     elseif event == "PLAYER_ENTERING_WORLD" and not initialized then
         initialized = true
 
@@ -215,6 +230,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.SetupInspectFrame()
         end)
 
-        print("|cff00ff00GearGuardian v2.2|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.3|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)

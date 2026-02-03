@@ -69,8 +69,8 @@ local function UpdateSlotBorder(slotFrame)
 
     -- If item is in slot, set color by quality and item level
     if itemLink then
-        local _, _, quality = GetItemInfo(itemLink)
-        local iLevel = GG.GetItemLevel(itemLink)
+        -- OPTIMIZED: Get both quality and iLevel in one call
+        local _, _, quality, iLevel = GetItemInfo(itemLink)
 
         -- Quality borders (check config)
         if GG.GetConfig("qualityBorders") and quality and quality > 1 then
@@ -251,6 +251,24 @@ function GG.SetupInspectFrame()
         end
     end
 
+    -- OPTIMIZATION: Scheduled timer for inspect updates (prevents duplicate updates)
+    local inspectUpdateTimer = nil
+
+    -- Schedule inspect update with debouncing (cancels previous timer)
+    local function ScheduleInspectUpdate(delay)
+        -- Cancel previous timer if exists
+        if inspectUpdateTimer then
+            inspectUpdateTimer:Cancel()
+        end
+
+        -- Schedule new update
+        inspectUpdateTimer = C_Timer.NewTimer(delay or 0.8, function()
+            UpdateAllInspectSlots()
+            GG.UpdateInspectAverageILevelDisplay()
+            inspectUpdateTimer = nil
+        end)
+    end
+
     -- Register events for inspect frame
     local inspectEventFrame = CreateFrame("Frame")
     inspectEventFrame:RegisterEvent("INSPECT_READY")
@@ -259,21 +277,11 @@ function GG.SetupInspectFrame()
             local targetUnit = InspectFrame and InspectFrame.unit or "target"
             GG.inspectedUnit = targetUnit
 
-            -- Update immediately with the unit name
-            C_Timer.After(0.5, function()
-                if not GG.inspectedUnit then
-                    GG.inspectedUnit = targetUnit  -- Restore if it was cleared
-                end
-                UpdateAllInspectSlots()
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
-            -- Try again after a longer delay to ensure data is loaded
-            C_Timer.After(1.0, function()
-                if not GG.inspectedUnit then
-                    GG.inspectedUnit = targetUnit  -- Restore if it was cleared
-                end
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
+            -- OPTIMIZED: Single scheduled update instead of multiple timers
+            if not GG.inspectedUnit then
+                GG.inspectedUnit = targetUnit
+            end
+            ScheduleInspectUpdate(0.8)
         end
     end)
 
@@ -286,24 +294,23 @@ function GG.SetupInspectFrame()
     if InspectFrame then
         InspectFrame:HookScript("OnShow", function(self)
             GG.inspectedUnit = self.unit or "target"
-            C_Timer.After(0.7, function()
-                UpdateAllInspectSlots()
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
-            -- Additional update after longer delay
-            C_Timer.After(1.5, function()
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
+            -- OPTIMIZED: Single scheduled update
+            ScheduleInspectUpdate(0.8)
         end)
 
         InspectFrame:HookScript("OnHide", function()
-            -- Delay clearing to allow timers to finish
-            C_Timer.After(2.0, function()
-                GG.inspectedUnit = nil
-                if GG.inspectAvgILevelFrame then
-                    GG.inspectAvgILevelFrame:Hide()
-                end
-            end)
+            -- OPTIMIZED: Immediate cleanup, no unnecessary delay
+            GG.inspectedUnit = nil
+            if inspectUpdateTimer then
+                inspectUpdateTimer:Cancel()
+                inspectUpdateTimer = nil
+            end
+            if GG.inspectGSFrame then
+                GG.inspectGSFrame:Hide()
+            end
+            if GG.inspectILevelFrame then
+                GG.inspectILevelFrame:Hide()
+            end
         end)
     end
 
@@ -313,18 +320,17 @@ function GG.SetupInspectFrame()
             if not GG.inspectedUnit then
                 GG.inspectedUnit = "target"
             end
-            C_Timer.After(0.7, function()
-                UpdateAllInspectSlots()
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
-            C_Timer.After(1.5, function()
-                GG.UpdateInspectAverageILevelDisplay()
-            end)
+            -- OPTIMIZED: Single scheduled update
+            ScheduleInspectUpdate(0.8)
         end)
 
         InspectPaperDollFrame:HookScript("OnHide", function()
-            if GG.inspectAvgILevelFrame then
-                GG.inspectAvgILevelFrame:Hide()
+            -- Cleanup frames
+            if GG.inspectGSFrame then
+                GG.inspectGSFrame:Hide()
+            end
+            if GG.inspectILevelFrame then
+                GG.inspectILevelFrame:Hide()
             end
         end)
     end

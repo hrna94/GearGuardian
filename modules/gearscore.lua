@@ -45,8 +45,8 @@ local GS_Formula = {
     }
 }
 
--- Calculate GearScore for a single item
-local function GetItemGearScore(itemLink)
+-- Calculate GearScore for a single item (made global for optimization)
+function GG.GetItemGearScore(itemLink)
     if not itemLink then return 0 end
 
     local _, _, itemRarity, itemLevel, _, _, _, _, equipSlot = GetItemInfo(itemLink)
@@ -123,7 +123,7 @@ function GG.CalculateGearScore(guid)
     for _, slotID in ipairs(slots) do
         local itemLink = GG.GetItemLinkByGUID(guid, slotID)
         if itemLink then
-            local score = GetItemGearScore(itemLink)
+            local score = GG.GetItemGearScore(itemLink)
             totalScore = totalScore + score
             itemCount = itemCount + 1
         end

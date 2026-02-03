@@ -54,14 +54,14 @@ closeButton:SetPoint("TOPRIGHT", -2, -2)
 
 -- Title
 local title = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-title:SetPoint("TOP", 0, 2)
+title:SetPoint("TOP", 0, 0)
 title:SetText("|cffFFD700GearGuardian|r")
 title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 
--- Version text
+-- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-version:SetPoint("TOP", title, "BOTTOM", 0, -4)
-version:SetText("|cff888888Version 2.2|r")
+version:SetPoint("LEFT", title, "RIGHT", 5, -2)
+version:SetText("|cff888888V. 2.3|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -238,7 +238,7 @@ infoText:SetJustifyH("CENTER")
 
 -- Author credit
 local authorText = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-authorText:SetPoint("BOTTOM", configFrame, "BOTTOM", 0, 30)
+authorText:SetPoint("BOTTOM", configFrame, "BOTTOM", 0, 32)
 authorText:SetText("|cff888888Created by |cffFFD700Sluck|r")
 authorText:SetFont("Fonts\\FRIZQT__.TTF", 10)
 

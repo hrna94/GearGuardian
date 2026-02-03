@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.2** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.3** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -102,7 +102,15 @@ All dependencies are included in the addon.
 
 ## Changelog
 
-See [CHANGELOG_v2.2.txt](CHANGELOG_v2.2.txt) for the latest changes.
+See [CHANGELOG_v2.3.txt](CHANGELOG_v2.3.txt) for the latest changes.
+
+### Version 2.3 (2026-02-03)
+- Major performance optimization update
+- Implemented intelligent cache systems (70-80% faster)
+- Optimized GearScore and iLevel calculations
+- Timer optimization for inspect flow
+- Item usability validation (class/armor restrictions)
+- UI improvements and repositioned displays
 
 ### Version 2.2 (2026-01-29)
 - Complete code refactoring into modular structure

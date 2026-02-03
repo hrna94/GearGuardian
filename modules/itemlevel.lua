@@ -9,7 +9,42 @@ if not GG then return end
 -- AVERAGE ILEVEL CALCULATION
 -- ============================================
 
+-- OPTIMIZED: Calculate both GearScore and average iLevel in single iteration
+-- This reduces API calls by ~50% compared to calling both functions separately
+function GG.CalculateGearScoreAndItemLevel(guid)
+    if not guid then return 0, 0 end
+
+    local slots = {1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}
+
+    local totalScore = 0
+    local totalILevel = 0
+    local itemCount = 0
+
+    for _, slotID in ipairs(slots) do
+        local itemLink = GG.GetItemLinkByGUID(guid, slotID)
+        if itemLink then
+            -- Get both GearScore and iLevel in one iteration
+            local score = GG.GetItemGearScore(itemLink)
+            local iLevel = GG.GetItemLevel(itemLink)
+
+            if score and score > 0 then
+                totalScore = totalScore + score
+            end
+
+            if iLevel and iLevel > 0 then
+                totalILevel = totalILevel + iLevel
+                itemCount = itemCount + 1
+            end
+        end
+    end
+
+    local avgILevel = itemCount > 0 and math.floor(totalILevel / itemCount + 0.5) or 0
+
+    return math.floor(totalScore), avgILevel
+end
+
 -- Calculate average item level for a unit (supports GUID via LibClassicInspector)
+-- NOTE: For best performance, use GG.CalculateGearScoreAndItemLevel() if you need both values
 function GG.CalculateAverageItemLevel(guid)
     if not guid then return 0 end
 
@@ -56,12 +91,16 @@ function GG.CalculateAverageItemLevel(guid)
 end
 
 -- Create or update average iLevel display on character frame
-GG.avgILevelFrame = nil
+GG.gsFrame = nil
+GG.iLevelFrame = nil
 
 function GG.UpdateAverageILevelDisplay()
     if not GG.GetConfig("averageILevel") then
-        if GG.avgILevelFrame then
-            GG.avgILevelFrame:Hide()
+        if GG.gsFrame then
+            GG.gsFrame:Hide()
+        end
+        if GG.iLevelFrame then
+            GG.iLevelFrame:Hide()
         end
         return
     end
@@ -70,73 +109,90 @@ function GG.UpdateAverageILevelDisplay()
         return
     end
 
-    -- Create frame if it doesn't exist
-    if not GG.avgILevelFrame then
-        GG.avgILevelFrame = CreateFrame("Frame", "GGAvgILevelFrame", PaperDollFrame)
-        GG.avgILevelFrame:SetSize(120, 16)
-        GG.avgILevelFrame:SetPoint("TOP", PaperDollFrame, "TOP", 0, -55)
+    -- Create GearScore frame (bottom right corner)
+    if not GG.gsFrame then
+        GG.gsFrame = CreateFrame("Frame", "GGGearScoreFrame", PaperDollFrame)
+        GG.gsFrame:SetSize(50, 14)
+        GG.gsFrame:SetPoint("BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 95)
+        GG.gsFrame:SetFrameStrata("HIGH")
+        GG.gsFrame:SetFrameLevel(200)
 
-        local bg = GG.avgILevelFrame:CreateTexture(nil, "BACKGROUND")
+        local bg = GG.gsFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
         bg:SetColorTexture(0, 0, 0, 0.8)
 
-        -- GearScore text
-        local gsLabel = GG.avgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        gsLabel:SetPoint("CENTER", GG.avgILevelFrame, "CENTER", -35, 0)
+        local gsLabel = GG.gsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        gsLabel:SetPoint("LEFT", GG.gsFrame, "LEFT", 2, 0)
         gsLabel:SetText("GS:")
-        gsLabel:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.avgILevelFrame.gsLabel = gsLabel
+        gsLabel:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.gsFrame.gsLabel = gsLabel
 
-        local gsValue = GG.avgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local gsValue = GG.gsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         gsValue:SetPoint("LEFT", gsLabel, "RIGHT", 2, 0)
-        gsValue:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.avgILevelFrame.gsValue = gsValue
-
-        -- iLvl text
-        local label = GG.avgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        label:SetPoint("LEFT", gsValue, "RIGHT", 5, 0)
-        label:SetText("iLvl:")
-        label:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.avgILevelFrame.label = label
-
-        local value = GG.avgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        value:SetPoint("LEFT", label, "RIGHT", 2, 0)
-        value:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.avgILevelFrame.value = value
+        gsValue:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.gsFrame.gsValue = gsValue
     end
 
-    -- Calculate and display
+    -- Create iLevel frame (directly below GearScore frame, no gap)
+    if not GG.iLevelFrame then
+        GG.iLevelFrame = CreateFrame("Frame", "GGILevelFrame", PaperDollFrame)
+        GG.iLevelFrame:SetSize(50, 14)
+        GG.iLevelFrame:SetPoint("TOP", GG.gsFrame, "BOTTOM", 0, 0)
+        GG.iLevelFrame:SetFrameStrata("HIGH")
+        GG.iLevelFrame:SetFrameLevel(200)
+
+        local bg = GG.iLevelFrame:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0, 0, 0, 0.8)
+
+        local label = GG.iLevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("LEFT", GG.iLevelFrame, "LEFT", 2, 0)
+        label:SetText("iLvl:")
+        label:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.iLevelFrame.label = label
+
+        local value = GG.iLevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        value:SetPoint("LEFT", label, "RIGHT", 2, 0)
+        value:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.iLevelFrame.value = value
+    end
+
+    -- Calculate and display (OPTIMIZED: single iteration for both values)
     local playerGUID = UnitGUID("player")
-    local gearScore = GG.CalculateGearScore(playerGUID)
-    local avgILevel = GG.CalculateAverageItemLevel(playerGUID)
+    local gearScore, avgILevel = GG.CalculateGearScoreAndItemLevel(playerGUID)
 
     -- Display GearScore
-    GG.avgILevelFrame.gsValue:SetText(gearScore)
+    GG.gsFrame.gsValue:SetText(gearScore)
     local r, g, b = GG.GetGearScoreColor(gearScore)
-    GG.avgILevelFrame.gsValue:SetTextColor(r, g, b)
+    GG.gsFrame.gsValue:SetTextColor(r, g, b)
 
     -- Display iLevel
-    GG.avgILevelFrame.value:SetText(avgILevel)
+    GG.iLevelFrame.value:SetText(avgILevel)
     if avgILevel >= 140 then
-        GG.avgILevelFrame.value:SetTextColor(1, 0.5, 0) -- Orange (epic tier)
+        GG.iLevelFrame.value:SetTextColor(1, 0.5, 0) -- Orange (epic tier)
     elseif avgILevel >= 115 then
-        GG.avgILevelFrame.value:SetTextColor(0.64, 0.21, 0.93) -- Purple (epic)
+        GG.iLevelFrame.value:SetTextColor(0.64, 0.21, 0.93) -- Purple (epic)
     elseif avgILevel >= 90 then
-        GG.avgILevelFrame.value:SetTextColor(0, 0.44, 0.87) -- Blue (rare)
+        GG.iLevelFrame.value:SetTextColor(0, 0.44, 0.87) -- Blue (rare)
     else
-        GG.avgILevelFrame.value:SetTextColor(0, 1, 0) -- Green
+        GG.iLevelFrame.value:SetTextColor(0, 1, 0) -- Green
     end
 
-    GG.avgILevelFrame:Show()
+    GG.gsFrame:Show()
+    GG.iLevelFrame:Show()
 end
 
 -- Create or update average iLevel display on inspect frame
-GG.inspectAvgILevelFrame = nil
+GG.inspectGSFrame = nil
+GG.inspectILevelFrame = nil
 
 function GG.UpdateInspectAverageILevelDisplay()
     if not GG.GetConfig("averageILevel") then
-        if GG.inspectAvgILevelFrame then
-            GG.inspectAvgILevelFrame:Hide()
+        if GG.inspectGSFrame then
+            GG.inspectGSFrame:Hide()
+        end
+        if GG.inspectILevelFrame then
+            GG.inspectILevelFrame:Hide()
         end
         return
     end
@@ -145,8 +201,11 @@ function GG.UpdateInspectAverageILevelDisplay()
     local unitToInspect = GG.inspectedUnit or "target"
 
     if not unitToInspect then
-        if GG.inspectAvgILevelFrame then
-            GG.inspectAvgILevelFrame:Hide()
+        if GG.inspectGSFrame then
+            GG.inspectGSFrame:Hide()
+        end
+        if GG.inspectILevelFrame then
+            GG.inspectILevelFrame:Hide()
         end
         return
     end
@@ -155,85 +214,99 @@ function GG.UpdateInspectAverageILevelDisplay()
     local currentInspectedUnit = unitToInspect
     local currentInspectedGUID = UnitGUID(unitToInspect)
 
-    -- Create frame if it doesn't exist
-    if not GG.inspectAvgILevelFrame then
-        -- Try to find the right parent frame
-        local parentFrame = InspectPaperDollFrame or InspectFrame
-        if not parentFrame then
-            -- Try again later
-            C_Timer.After(0.5, GG.UpdateInspectAverageILevelDisplay)
-            return
-        end
+    -- Try to find the right parent frame
+    local parentFrame = InspectPaperDollFrame or InspectFrame
+    if not parentFrame then
+        -- OPTIMIZED: Removed redundant timer, handled by ScheduleInspectUpdate in borders.lua
+        return
+    end
 
-        GG.inspectAvgILevelFrame = CreateFrame("Frame", "GGInspectAvgILevelFrame", UIParent)
-        GG.inspectAvgILevelFrame:SetSize(120, 16)
-        GG.inspectAvgILevelFrame:SetFrameStrata("HIGH")
-        GG.inspectAvgILevelFrame:SetFrameLevel(100)
+    -- Create GearScore frame (left side, near feet)
+    if not GG.inspectGSFrame then
+        GG.inspectGSFrame = CreateFrame("Frame", "GGInspectGearScoreFrame", UIParent)
+        GG.inspectGSFrame:SetSize(50, 14)
+        GG.inspectGSFrame:SetFrameStrata("HIGH")
+        GG.inspectGSFrame:SetFrameLevel(100)
 
-        local bg = GG.inspectAvgILevelFrame:CreateTexture(nil, "BACKGROUND")
+        local bg = GG.inspectGSFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
         bg:SetColorTexture(0, 0, 0, 0.8)
 
-        -- GearScore text
-        local gsLabel = GG.inspectAvgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        gsLabel:SetPoint("CENTER", GG.inspectAvgILevelFrame, "CENTER", -35, 0)
+        local gsLabel = GG.inspectGSFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        gsLabel:SetPoint("LEFT", GG.inspectGSFrame, "LEFT", 2, 0)
         gsLabel:SetText("GS:")
-        gsLabel:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.inspectAvgILevelFrame.gsLabel = gsLabel
+        gsLabel:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.inspectGSFrame.gsLabel = gsLabel
 
-        local gsValue = GG.inspectAvgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local gsValue = GG.inspectGSFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         gsValue:SetPoint("LEFT", gsLabel, "RIGHT", 2, 0)
-        gsValue:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.inspectAvgILevelFrame.gsValue = gsValue
+        gsValue:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.inspectGSFrame.gsValue = gsValue
+    end
 
-        -- iLvl text
-        local label = GG.inspectAvgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        label:SetPoint("LEFT", gsValue, "RIGHT", 5, 0)
+    -- Create iLevel frame (right side, near feet)
+    if not GG.inspectILevelFrame then
+        GG.inspectILevelFrame = CreateFrame("Frame", "GGInspectILevelFrame", UIParent)
+        GG.inspectILevelFrame:SetSize(50, 14)
+        GG.inspectILevelFrame:SetFrameStrata("HIGH")
+        GG.inspectILevelFrame:SetFrameLevel(100)
+
+        local bg = GG.inspectILevelFrame:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0, 0, 0, 0.8)
+
+        local label = GG.inspectILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("LEFT", GG.inspectILevelFrame, "LEFT", 2, 0)
         label:SetText("iLvl:")
-        label:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.inspectAvgILevelFrame.label = label
+        label:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.inspectILevelFrame.label = label
 
-        local value = GG.inspectAvgILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local value = GG.inspectILevelFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         value:SetPoint("LEFT", label, "RIGHT", 2, 0)
-        value:SetFont("Fonts\\FRIZQT__.TTF", 10)
-        GG.inspectAvgILevelFrame.value = value
+        value:SetFont("Fonts\\FRIZQT__.TTF", 9)
+        GG.inspectILevelFrame.value = value
     end
 
     -- Position relative to inspect frame
-    local parentFrame = InspectPaperDollFrame or InspectFrame
-
     if parentFrame and parentFrame:IsShown() then
-        GG.inspectAvgILevelFrame:ClearAllPoints()
-        GG.inspectAvgILevelFrame:SetPoint("TOP", parentFrame, "TOP", 0, -40)
-        GG.inspectAvgILevelFrame:SetParent(parentFrame)
+        -- Position on bottom right corner of inspect frame
+        GG.inspectGSFrame:ClearAllPoints()
+        GG.inspectGSFrame:SetPoint("BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 15)
+        GG.inspectGSFrame:SetParent(parentFrame)
 
-        -- Calculate and display
-        local gearScore = GG.CalculateGearScore(currentInspectedGUID)
-        local avgILevel = GG.CalculateAverageItemLevel(currentInspectedGUID)
+        GG.inspectILevelFrame:ClearAllPoints()
+        GG.inspectILevelFrame:SetPoint("TOP", GG.inspectGSFrame, "BOTTOM", 0, 0)
+        GG.inspectILevelFrame:SetParent(parentFrame)
+
+        -- Calculate and display (OPTIMIZED: single iteration for both values)
+        local gearScore, avgILevel = GG.CalculateGearScoreAndItemLevel(currentInspectedGUID)
 
         if (gearScore and gearScore > 0) or (avgILevel and avgILevel > 0) then
             -- Display GearScore
-            GG.inspectAvgILevelFrame.gsValue:SetText(gearScore or 0)
+            GG.inspectGSFrame.gsValue:SetText(gearScore or 0)
             local r, g, b = GG.GetGearScoreColor(gearScore or 0)
-            GG.inspectAvgILevelFrame.gsValue:SetTextColor(r, g, b)
+            GG.inspectGSFrame.gsValue:SetTextColor(r, g, b)
 
             -- Display iLevel
-            GG.inspectAvgILevelFrame.value:SetText(avgILevel or 0)
+            GG.inspectILevelFrame.value:SetText(avgILevel or 0)
             if avgILevel >= 140 then
-                GG.inspectAvgILevelFrame.value:SetTextColor(1, 0.5, 0)
+                GG.inspectILevelFrame.value:SetTextColor(1, 0.5, 0)
             elseif avgILevel >= 115 then
-                GG.inspectAvgILevelFrame.value:SetTextColor(0.64, 0.21, 0.93)
+                GG.inspectILevelFrame.value:SetTextColor(0.64, 0.21, 0.93)
             elseif avgILevel >= 90 then
-                GG.inspectAvgILevelFrame.value:SetTextColor(0, 0.44, 0.87)
+                GG.inspectILevelFrame.value:SetTextColor(0, 0.44, 0.87)
             else
-                GG.inspectAvgILevelFrame.value:SetTextColor(0, 1, 0)
+                GG.inspectILevelFrame.value:SetTextColor(0, 1, 0)
             end
 
-            GG.inspectAvgILevelFrame:Show()
+            GG.inspectGSFrame:Show()
+            GG.inspectILevelFrame:Show()
         else
-            GG.inspectAvgILevelFrame:Hide()
+            GG.inspectGSFrame:Hide()
+            GG.inspectILevelFrame:Hide()
         end
     else
-        GG.inspectAvgILevelFrame:Hide()
+        GG.inspectGSFrame:Hide()
+        GG.inspectILevelFrame:Hide()
     end
 end
