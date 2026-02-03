@@ -4,13 +4,13 @@
 *_old.lua
 *_old.*
 FIXES_APPLIED.txt
+DEVELOPMENT_NOTES.md
 
 # Old changelogs (we keep CHANGELOG.md)
-CHANGELOG_v2.1.txt
-CHANGELOG_v2.2.txt
+CHANGELOG_v*.txt
 
 # Old descriptions
-Description_v2.1.txt
+Description_v*.txt
 
 # WoW SavedVariables (user data - never commit!)
 *.lua.bak
