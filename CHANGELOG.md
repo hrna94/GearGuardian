@@ -1,5 +1,29 @@
 # GearGuardian Changelog
 
+## Version 2.4 (2026-02-06)
+
+### New Feature: Draggable GS & iLevel Displays
+
+**Drag and Drop Functionality:**
+- GS and iLevel frames can now be repositioned via Shift+Click drag and drop
+- Works on both Character frame and Inspect frame
+- Position is saved per-frame (charGS, charILevel, inspectGS, inspectILevel)
+- Positions are stored in SavedVariables and persist between sessions
+- Tooltip shows "Shift+Click to drag" on hover
+
+**Technical Improvements:**
+- Frames use relative positioning to parent frame (not absolute screen position)
+- Automatically follow parent frame when it moves (e.g., when inspect opens)
+- Dynamic frame level adjustment for inspect frames to stay above 3D character model
+- Frames remain interactive even when positioned over character models
+
+**Frame Level Optimization:**
+- Inspect frames use TOOLTIP strata with dynamic frame level calculation
+- Ensures frames are always clickable and draggable regardless of position
+- Fixed issue where frames became non-interactive when placed over 3D models
+
+---
+
 ## Version 2.3 (2026-02-03)
 
 ### Major Performance Optimization Update

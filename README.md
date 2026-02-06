@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.3** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.4** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -23,6 +23,10 @@
 - Color-coded tiers: gray/white/green/blue/purple/orange
 - Displayed on character frame and inspect frame
 - Uses TBC-appropriate formulas (400 points per tier)
+- **NEW in 2.4:** Shift+Click to drag and reposition GS/iLevel displays anywhere you want!
+  - Positions are saved per-frame and persist between sessions
+  - Works on both character and inspect frames
+  - Frames automatically follow their parent frame when it moves
 
 ### 🔍 Full Inspect Frame Integration
 When you inspect another player, you see:
@@ -102,7 +106,13 @@ All dependencies are included in the addon.
 
 ## Changelog
 
-See [CHANGELOG_v2.3.txt](CHANGELOG_v2.3.txt) for the latest changes.
+See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
+
+### Version 2.4 (2026-02-06)
+- Added draggable GS & iLevel displays (Shift+Click to drag)
+- Positions saved per-frame and persist between sessions
+- Frames automatically follow parent when it moves
+- Fixed frame level for inspect frames to stay above 3D models
 
 ### Version 2.3 (2026-02-03)
 - Major performance optimization update

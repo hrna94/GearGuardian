@@ -90,6 +90,100 @@ function GG.CalculateAverageItemLevel(guid)
     return math.floor(totalILevel / itemCount + 0.5)
 end
 
+-- ============================================
+-- DRAG AND DROP FUNCTIONALITY
+-- ============================================
+
+-- Make a frame draggable with Shift+click
+local function MakeFrameDraggable(frame, saveKey, defaultParent, defaultRelativePoint)
+    if not frame then return end
+
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+
+    -- Store default parent for repositioning after drag
+    frame.defaultParent = defaultParent
+    frame.defaultRelativePoint = defaultRelativePoint
+
+    -- Tooltip on hover
+    frame:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Shift+Click to drag", 1, 1, 1)
+        GameTooltip:Show()
+    end)
+
+    frame:SetScript("OnLeave", function(self)
+        GameTooltip:Hide()
+    end)
+
+    -- Start drag on Shift+Click
+    frame:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" and IsShiftKeyDown() then
+            self:StartMoving()
+        end
+    end)
+
+    -- Stop drag and save position relative to parent
+    frame:SetScript("OnMouseUp", function(self, button)
+        if button == "LeftButton" then
+            self:StopMovingOrSizing()
+
+            -- Save position relative to parent
+            if saveKey and self.defaultParent then
+                if not GearGuardianDB.framePositions then
+                    GearGuardianDB.framePositions = {}
+                end
+
+                -- Get current position (might be relative to UIParent after drag)
+                local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+
+                -- Calculate position relative to our parent frame
+                local parentX, parentY = self.defaultParent:GetCenter()
+                local selfX, selfY = self:GetCenter()
+
+                if parentX and parentY and selfX and selfY then
+                    local relX = selfX - parentX
+                    local relY = selfY - parentY
+
+                    GearGuardianDB.framePositions[saveKey] = {
+                        relX = relX,
+                        relY = relY
+                    }
+
+                    -- Reposition relative to parent
+                    self:ClearAllPoints()
+                    self:SetPoint("CENTER", self.defaultParent, "CENTER", relX, relY)
+                end
+            end
+        end
+    end)
+end
+
+-- Restore saved position for a frame
+local function RestoreFramePosition(frame, saveKey, defaultPoint, defaultRelativeTo, defaultRelativePoint, defaultX, defaultY)
+    if not frame then return end
+
+    frame:ClearAllPoints()
+
+    if GearGuardianDB and GearGuardianDB.framePositions and GearGuardianDB.framePositions[saveKey] then
+        local pos = GearGuardianDB.framePositions[saveKey]
+
+        -- New format: relative to center of parent
+        if pos.relX and pos.relY then
+            frame:SetPoint("CENTER", defaultRelativeTo, "CENTER", pos.relX, pos.relY)
+        -- Old format: legacy support
+        elseif pos.point and pos.relativePoint then
+            frame:SetPoint(pos.point, defaultRelativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+        else
+            -- Fallback to default
+            frame:SetPoint(defaultPoint, defaultRelativeTo, defaultRelativePoint, defaultX, defaultY)
+        end
+    else
+        frame:SetPoint(defaultPoint, defaultRelativeTo, defaultRelativePoint, defaultX, defaultY)
+    end
+end
+
 -- Create or update average iLevel display on character frame
 GG.gsFrame = nil
 GG.iLevelFrame = nil
@@ -113,7 +207,6 @@ function GG.UpdateAverageILevelDisplay()
     if not GG.gsFrame then
         GG.gsFrame = CreateFrame("Frame", "GGGearScoreFrame", PaperDollFrame)
         GG.gsFrame:SetSize(50, 14)
-        GG.gsFrame:SetPoint("BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 95)
         GG.gsFrame:SetFrameStrata("HIGH")
         GG.gsFrame:SetFrameLevel(200)
 
@@ -131,13 +224,18 @@ function GG.UpdateAverageILevelDisplay()
         gsValue:SetPoint("LEFT", gsLabel, "RIGHT", 2, 0)
         gsValue:SetFont("Fonts\\FRIZQT__.TTF", 9)
         GG.gsFrame.gsValue = gsValue
+
+        -- Make draggable with Shift+click
+        MakeFrameDraggable(GG.gsFrame, "charGS", PaperDollFrame, "BOTTOMRIGHT")
+
+        -- Restore saved position or set default
+        RestoreFramePosition(GG.gsFrame, "charGS", "BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 95)
     end
 
     -- Create iLevel frame (directly below GearScore frame, no gap)
     if not GG.iLevelFrame then
         GG.iLevelFrame = CreateFrame("Frame", "GGILevelFrame", PaperDollFrame)
         GG.iLevelFrame:SetSize(50, 14)
-        GG.iLevelFrame:SetPoint("TOP", GG.gsFrame, "BOTTOM", 0, 0)
         GG.iLevelFrame:SetFrameStrata("HIGH")
         GG.iLevelFrame:SetFrameLevel(200)
 
@@ -155,6 +253,12 @@ function GG.UpdateAverageILevelDisplay()
         value:SetPoint("LEFT", label, "RIGHT", 2, 0)
         value:SetFont("Fonts\\FRIZQT__.TTF", 9)
         GG.iLevelFrame.value = value
+
+        -- Make draggable with Shift+click
+        MakeFrameDraggable(GG.iLevelFrame, "charILevel", PaperDollFrame, "BOTTOM")
+
+        -- Restore saved position or set default
+        RestoreFramePosition(GG.iLevelFrame, "charILevel", "TOP", GG.gsFrame, "BOTTOM", 0, 0)
     end
 
     -- Calculate and display (OPTIMIZED: single iteration for both values)
@@ -225,8 +329,8 @@ function GG.UpdateInspectAverageILevelDisplay()
     if not GG.inspectGSFrame then
         GG.inspectGSFrame = CreateFrame("Frame", "GGInspectGearScoreFrame", UIParent)
         GG.inspectGSFrame:SetSize(50, 14)
-        GG.inspectGSFrame:SetFrameStrata("HIGH")
-        GG.inspectGSFrame:SetFrameLevel(100)
+        GG.inspectGSFrame:SetFrameStrata("TOOLTIP")
+        GG.inspectGSFrame:SetFrameLevel(500)
 
         local bg = GG.inspectGSFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
@@ -242,14 +346,17 @@ function GG.UpdateInspectAverageILevelDisplay()
         gsValue:SetPoint("LEFT", gsLabel, "RIGHT", 2, 0)
         gsValue:SetFont("Fonts\\FRIZQT__.TTF", 9)
         GG.inspectGSFrame.gsValue = gsValue
+
+        -- Make draggable with Shift+click (parent will be set when positioning)
+        MakeFrameDraggable(GG.inspectGSFrame, "inspectGS", nil, "BOTTOMRIGHT")
     end
 
     -- Create iLevel frame (right side, near feet)
     if not GG.inspectILevelFrame then
         GG.inspectILevelFrame = CreateFrame("Frame", "GGInspectILevelFrame", UIParent)
         GG.inspectILevelFrame:SetSize(50, 14)
-        GG.inspectILevelFrame:SetFrameStrata("HIGH")
-        GG.inspectILevelFrame:SetFrameLevel(100)
+        GG.inspectILevelFrame:SetFrameStrata("TOOLTIP")
+        GG.inspectILevelFrame:SetFrameLevel(500)
 
         local bg = GG.inspectILevelFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
@@ -265,18 +372,27 @@ function GG.UpdateInspectAverageILevelDisplay()
         value:SetPoint("LEFT", label, "RIGHT", 2, 0)
         value:SetFont("Fonts\\FRIZQT__.TTF", 9)
         GG.inspectILevelFrame.value = value
+
+        -- Make draggable with Shift+click (parent will be set when positioning)
+        MakeFrameDraggable(GG.inspectILevelFrame, "inspectILevel", nil, "BOTTOM")
     end
 
     -- Position relative to inspect frame
     if parentFrame and parentFrame:IsShown() then
-        -- Position on bottom right corner of inspect frame
-        GG.inspectGSFrame:ClearAllPoints()
-        GG.inspectGSFrame:SetPoint("BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 15)
-        GG.inspectGSFrame:SetParent(parentFrame)
+        -- Update parent for drag and drop
+        GG.inspectGSFrame.defaultParent = parentFrame
+        GG.inspectILevelFrame.defaultParent = parentFrame
 
-        GG.inspectILevelFrame:ClearAllPoints()
-        GG.inspectILevelFrame:SetPoint("TOP", GG.inspectGSFrame, "BOTTOM", 0, 0)
+        -- Restore saved positions or set defaults
+        GG.inspectGSFrame:SetParent(parentFrame)
+        RestoreFramePosition(GG.inspectGSFrame, "inspectGS", "BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 15)
+        -- Set high frame level AFTER setting parent to ensure it's above the 3D model
+        GG.inspectGSFrame:SetFrameLevel(parentFrame:GetFrameLevel() + 200)
+
         GG.inspectILevelFrame:SetParent(parentFrame)
+        RestoreFramePosition(GG.inspectILevelFrame, "inspectILevel", "TOP", GG.inspectGSFrame, "BOTTOM", 0, 0)
+        -- Set high frame level AFTER setting parent to ensure it's above the 3D model
+        GG.inspectILevelFrame:SetFrameLevel(parentFrame:GetFrameLevel() + 200)
 
         -- Calculate and display (OPTIMIZED: single iteration for both values)
         local gearScore, avgILevel = GG.CalculateGearScoreAndItemLevel(currentInspectedGUID)

@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.2
+    Version: 2.4
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -230,6 +230,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.SetupInspectFrame()
         end)
 
-        print("|cff00ff00GearGuardian v2.3|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.4|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)
