@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Configuration Panel UI
     Author: Sluck
-    Version: 2.4
+    Version: 2.5
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 --]]
@@ -61,7 +61,7 @@ title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 -- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 version:SetPoint("LEFT", title, "RIGHT", 5, -2)
-version:SetText("|cff888888V. 2.4|r")
+version:SetText("|cff888888V. 2.5|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
