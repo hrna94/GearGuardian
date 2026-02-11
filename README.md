@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.4** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.5** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -23,10 +23,11 @@
 - Color-coded tiers: gray/white/green/blue/purple/orange
 - Displayed on character frame and inspect frame
 - Uses TBC-appropriate formulas (400 points per tier)
-- **NEW in 2.4:** Shift+Click to drag and reposition GS/iLevel displays anywhere you want!
+- Shift+Click to drag and reposition GS/iLevel displays anywhere you want
+  - GS and iLevel frames move independently of each other
   - Positions are saved per-frame and persist between sessions
   - Works on both character and inspect frames
-  - Frames automatically follow their parent frame when it moves
+  - Use `/gg reset` to restore default positions
 
 ### 🔍 Full Inspect Frame Integration
 When you inspect another player, you see:
@@ -56,6 +57,7 @@ When you inspect another player, you see:
 ### Commands
 - `/gg` or `/gg config` - Open configuration panel
 - `/gg toggle` - Enable/disable addon
+- `/gg reset` - Reset GS/iLevel frames to default positions
 - `/gg debug` - Debug enchant/gem checking
 
 ### Configuration
@@ -107,6 +109,11 @@ All dependencies are included in the addon.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
+
+### Version 2.5 (2026-02-11)
+- Fixed iLevel frame disappearing or misplaced after drag (position reference bug from v2.4)
+- GS and iLevel frames are now fully independent (drag each separately)
+- Added `/gg reset` command to restore default frame positions
 
 ### Version 2.4 (2026-02-06)
 - Added draggable GS & iLevel displays (Shift+Click to drag)

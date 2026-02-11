@@ -258,7 +258,7 @@ function GG.UpdateAverageILevelDisplay()
         MakeFrameDraggable(GG.iLevelFrame, "charILevel", PaperDollFrame, "BOTTOM")
 
         -- Restore saved position or set default
-        RestoreFramePosition(GG.iLevelFrame, "charILevel", "TOP", GG.gsFrame, "BOTTOM", 0, 0)
+        RestoreFramePosition(GG.iLevelFrame, "charILevel", "BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 81)
     end
 
     -- Calculate and display (OPTIMIZED: single iteration for both values)
@@ -390,7 +390,7 @@ function GG.UpdateInspectAverageILevelDisplay()
         GG.inspectGSFrame:SetFrameLevel(parentFrame:GetFrameLevel() + 200)
 
         GG.inspectILevelFrame:SetParent(parentFrame)
-        RestoreFramePosition(GG.inspectILevelFrame, "inspectILevel", "TOP", GG.inspectGSFrame, "BOTTOM", 0, 0)
+        RestoreFramePosition(GG.inspectILevelFrame, "inspectILevel", "BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 1)
         -- Set high frame level AFTER setting parent to ensure it's above the 3D model
         GG.inspectILevelFrame:SetFrameLevel(parentFrame:GetFrameLevel() + 200)
 
@@ -425,4 +425,42 @@ function GG.UpdateInspectAverageILevelDisplay()
         GG.inspectGSFrame:Hide()
         GG.inspectILevelFrame:Hide()
     end
+end
+
+-- ============================================
+-- RESET FRAME POSITIONS
+-- ============================================
+
+function GG.ResetFramePositions()
+    -- Clear all saved positions
+    if GearGuardianDB then
+        GearGuardianDB.framePositions = {}
+    end
+
+    -- Reset character frames
+    if GG.gsFrame then
+        GG.gsFrame:ClearAllPoints()
+        GG.gsFrame:SetPoint("BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 95)
+    end
+
+    if GG.iLevelFrame then
+        GG.iLevelFrame:ClearAllPoints()
+        GG.iLevelFrame:SetPoint("BOTTOMLEFT", PaperDollFrame, "BOTTOMRIGHT", -84, 81)
+    end
+
+    -- Reset inspect frames
+    local parentFrame = InspectPaperDollFrame or InspectFrame
+    if parentFrame then
+        if GG.inspectGSFrame then
+            GG.inspectGSFrame:ClearAllPoints()
+            GG.inspectGSFrame:SetPoint("BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 15)
+        end
+
+        if GG.inspectILevelFrame then
+            GG.inspectILevelFrame:ClearAllPoints()
+            GG.inspectILevelFrame:SetPoint("BOTTOMLEFT", parentFrame, "BOTTOMRIGHT", -54, 1)
+        end
+    end
+
+    print("|cff00ff00GearGuardian:|r Frame positions reset to defaults.")
 end

@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.4
+    Version: 2.5
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -75,6 +75,8 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
                     emptySockets))
             end
         end
+    elseif msg == "reset" then
+        GG.ResetFramePositions()
     elseif msg == "debuginspect" or msg == "di" then
         -- Debug for inspected target
         if not GG.inspectedUnit then
@@ -179,6 +181,7 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         print("|cff00ff00GearGuardian Commands:|r")
         print("/gg or /gg config - Open configuration panel")
         print("/gg toggle - Toggle addon on/off")
+        print("/gg reset - Reset GS/iLevel frames to default positions")
         print("/gg debug - Debug enchant/gem checking (yourself)")
         print("/gg debuginspect - Debug inspect target enchants")
     end
@@ -230,6 +233,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.SetupInspectFrame()
         end)
 
-        print("|cff00ff00GearGuardian v2.4|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.5|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)

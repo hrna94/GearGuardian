@@ -1,5 +1,21 @@
 # GearGuardian Changelog
 
+## Version 2.5 (2026-02-11)
+
+### Bug Fix: Draggable Frame Position Corruption
+
+**Fixed:**
+- Fixed iLevel frame disappearing or appearing at wrong position after drag in v2.4
+- Root cause: position was saved relative to GS frame but restored relative to parent frame (coordinate mismatch)
+- Both GS and iLevel frames are now fully independent — each saves and restores position relative to its own parent frame
+- Both frames can now be dragged separately without affecting each other
+
+**New Command:**
+- `/gg reset` — resets GS and iLevel frames to their default positions immediately (no UI reload needed)
+- Recommended for users upgrading from v2.4 who have corrupted frame positions
+
+---
+
 ## Version 2.4 (2026-02-06)
 
 ### New Feature: Draggable GS & iLevel Displays
