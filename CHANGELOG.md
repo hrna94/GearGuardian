@@ -1,5 +1,44 @@
 # GearGuardian Changelog
 
+## Version 2.6 (2026-02-11)
+
+### New Features
+
+**1. Export Gear String**
+- `/gg export` command exports your gear to a copyable text format
+- Includes GearScore, average iLevel, all equipped items with enchant/socket status
+- Perfect for recruitment applications, sharing in Discord, or guild requirements
+- Shows missing enchants and empty sockets clearly marked
+
+**2. Minimap Button**
+- New minimap button for quick access to GearGuardian
+- Left-click: Open config panel
+- Right-click: Quick menu with toggles and commands
+- Draggable around minimap edge
+- `/gg minimap` command to toggle visibility
+- Position saved between sessions
+
+**3. Meta Gem Requirement Check**
+- Automatically detects meta gems in head slot
+- Checks if gem color requirements are met (e.g., "2 red + 2 blue gems")
+- Yellow warning icon on head slot if meta gem is inactive
+- Supports all TBC meta gems (Skyfire Diamond, Earthstorm Diamond)
+- Configurable in settings panel
+
+**4. Gem Socket Check - Now Functional!**
+- Empty gem socket detection is now confirmed working in TBC
+- Yellow warning icon for any items with empty sockets
+- Works alongside enchant check for complete gear validation
+- Moved from "Coming Soon" to active features
+
+**Technical Improvements:**
+- Added modules: `export.lua`, `minimap.lua`, `metagems.lua`
+- Improved config system to support new features
+- Better SavedVariables management for minimap position
+- Minimap button with full dropdown menu integration
+
+---
+
 ## Version 2.5 (2026-02-11)
 
 ### Bug Fix: Draggable Frame Position Corruption

@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.5
+    Version: 2.6
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -77,6 +77,85 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         end
     elseif msg == "reset" then
         GG.ResetFramePositions()
+    elseif msg == "export" then
+        GG.ExportGear("player")
+    elseif msg == "minimap" then
+        GG.ToggleMinimapButton()
+    elseif msg == "showconfig" or msg == "sc" then
+        -- Show current config values
+        print("|cff00ff00GearGuardian Config:|r")
+        print("Enchant Check: " .. (GG.GetConfig("enchantCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Gem Check: " .. (GG.GetConfig("gemCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Meta Gem Check: " .. (GG.GetConfig("metaGemCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Quality Borders: " .. (GG.GetConfig("qualityBorders") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Item Level: " .. (GG.GetConfig("itemLevel") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("GearScore Display: " .. (GG.GetConfig("averageILevel") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+    elseif msg == "debugmeta" or msg == "dm" then
+        -- Debug meta gem requirements
+        local unit = GG.inspectedUnit or "player"
+        local guid = UnitGUID(unit)
+        local unitName = UnitName(unit) or "Unknown"
+
+        print("|cff00ff00GearGuardian Meta Gem Debug:|r " .. unitName)
+
+        if not guid then
+            print("|cffff0000No valid unit to inspect!|r")
+            return
+        end
+
+        -- Check meta gem
+        local metaGemID = GG.GetMetaGemID(guid)
+        if not metaGemID then
+            print("|cffff0000No meta gem found in head slot!|r")
+            print("You need to socket a meta gem (Skyfire Diamond, Earthstorm Diamond, etc.) in your helmet.")
+        else
+            local metaName = GetItemInfo(metaGemID)
+            print("Meta Gem: " .. (metaName or "Unknown") .. " (ID: " .. metaGemID .. ")")
+
+            -- Show requirements
+            local requirements = GG.META_GEM_REQUIREMENTS and GG.META_GEM_REQUIREMENTS[metaGemID]
+            if requirements then
+                print("Requirements: " .. requirements)
+            else
+                print("|cffFFFF00Unknown requirements for this meta gem|r")
+            end
+
+            -- Count current gems
+            local gemCounts = GG.CountGems(guid)
+            if gemCounts then
+                print("\nYour current gems:")
+                print("  Red: " .. gemCounts.red)
+                print("  Yellow: " .. gemCounts.yellow)
+                print("  Blue: " .. gemCounts.blue)
+                print("  Meta: " .. gemCounts.meta)
+                if gemCounts.orange > 0 then print("  Orange (red+yellow): " .. gemCounts.orange) end
+                if gemCounts.purple > 0 then print("  Purple (red+blue): " .. gemCounts.purple) end
+                if gemCounts.green > 0 then print("  Green (yellow+blue): " .. gemCounts.green) end
+                if gemCounts.prismatic > 0 then print("  Prismatic: " .. gemCounts.prismatic) end
+            end
+
+            -- Check if requirements are met
+            local isActive, message = GG.CheckMetaGemRequirements(guid)
+            print("\nMeta Gem Status: " .. (isActive and "|cff00ff00ACTIVE|r" or "|cffff0000INACTIVE|r"))
+            if message then
+                print("Message: " .. message)
+            end
+        end
+    elseif msg == "debuggems" or msg == "dg" then
+        -- Debug gem detection on yourself
+        print("|cff00ff00GearGuardian Gem Debug:|r Checking your equipped items...")
+        local slotNames = {
+            [1] = "Head", [3] = "Shoulders", [5] = "Chest", [7] = "Legs",
+            [8] = "Feet", [9] = "Wrists", [10] = "Hands", [6] = "Waist",
+            [11] = "Finger1", [12] = "Finger2"
+        }
+        for slotID, slotName in pairs(slotNames) do
+            local itemLink = GetInventoryItemLink("player", slotID)
+            if itemLink then
+                GG.DebugGemInfo(slotID, UnitGUID("player"))
+                print("") -- spacing
+            end
+        end
     elseif msg == "debuginspect" or msg == "di" then
         -- Debug for inspected target
         if not GG.inspectedUnit then
@@ -182,7 +261,12 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         print("/gg or /gg config - Open configuration panel")
         print("/gg toggle - Toggle addon on/off")
         print("/gg reset - Reset GS/iLevel frames to default positions")
+        print("/gg export - Export your gear to text (for sharing)")
+        print("/gg minimap - Toggle minimap button on/off")
+        print("/gg showconfig - Show current feature settings")
         print("/gg debug - Debug enchant/gem checking (yourself)")
+        print("/gg debuggems - Debug gem detection with detailed info")
+        print("/gg debugmeta - Debug meta gem requirements (inspect target)")
         print("/gg debuginspect - Debug inspect target enchants")
     end
 end
@@ -231,6 +315,11 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
         -- Initialize inspect frame (delayed to ensure frames are loaded)
         C_Timer.After(1, function()
             GG.SetupInspectFrame()
+        end)
+
+        -- Initialize minimap button
+        C_Timer.After(2, function()
+            GG.InitMinimapButton()
         end)
 
         print("|cff00ff00GearGuardian v2.5|r loaded! Type |cffFFFF00/gg|r for options.")

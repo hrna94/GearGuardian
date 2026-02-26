@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.5** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.6** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -14,9 +14,11 @@
 
 ### 🛡️ Enchant & Gem Monitoring
 - Yellow warning icons (⚠️) on items missing enchants or containing empty gem sockets
+- **NEW in 2.6:** Meta gem requirement check - warns if meta gem is inactive
 - Works on **YOUR character AND inspected targets**
 - Perfect for raid leaders checking team readiness
 - Detects all TBC enchants (Head, Shoulders, Legs, Chest, Weapons, etc.)
+- Automatically validates meta gem color requirements (e.g., "2 red + 2 blue")
 
 ### 📊 GearScore System
 - Professional GearScore calculation for TBC Classic
@@ -58,7 +60,15 @@ When you inspect another player, you see:
 - `/gg` or `/gg config` - Open configuration panel
 - `/gg toggle` - Enable/disable addon
 - `/gg reset` - Reset GS/iLevel frames to default positions
+- `/gg export` - Export your gear to text (for sharing/recruitment)
+- `/gg minimap` - Toggle minimap button on/off
 - `/gg debug` - Debug enchant/gem checking
+
+### Minimap Button
+- **NEW in 2.6:** Click the minimap button for quick access
+- Left-click: Open config panel
+- Right-click: Quick menu with feature toggles
+- Drag to reposition around minimap
 
 ### Configuration
 Open the configuration panel with `/gg` to customize:
@@ -109,6 +119,13 @@ All dependencies are included in the addon.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
+
+### Version 2.6 (2026-02-11)
+- Added Export Gear String (`/gg export`) - copy your gear to text for sharing
+- Added Minimap Button - quick access with left/right-click menus
+- Added Meta Gem Requirement Check - warns if meta gem is inactive
+- Gem Socket Check now confirmed functional in TBC (moved from "Coming Soon")
+- All features configurable in settings panel and minimap menu
 
 ### Version 2.5 (2026-02-11)
 - Fixed iLevel frame disappearing or misplaced after drag (position reference bug from v2.4)

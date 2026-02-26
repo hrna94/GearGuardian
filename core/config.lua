@@ -20,6 +20,7 @@ GG.defaultConfig = {
         bagHighlight = false,       -- Highlight upgrades in bags (DISABLED - TBC bag API issues)
         enchantCheck = true,        -- Check for missing enchants
         gemCheck = true,            -- Check for empty gem sockets
+        metaGemCheck = false,       -- Check meta gem requirements (coming soon)
         setBonusTracking = false,   -- Show tier set bonuses (future)
         dualSpecSupport = false     -- Support for dual spec (future)
     }

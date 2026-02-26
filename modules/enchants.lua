@@ -23,6 +23,9 @@ GG.enchantGemCache = {}
 -- Clear enchant/gem cache (called on equipment change)
 function GG.ClearEnchantGemCache()
     GG.enchantGemCache = {}
+    if GG.ClearGemCache then
+        GG.ClearGemCache()
+    end
 end
 
 -- Parse enchant ID from itemLink (TBC format)
@@ -271,76 +274,6 @@ function GG.HasEnchant(slotID, debugMode, guid)
 end
 
 -- Check if item has empty gem sockets (supports inspected players via tooltip)
-function GG.GetEmptySocketCount(slotID, guid)
-    if not scanTooltip then return 0 end
-
-    -- Check cache first
-    local cacheKey = (guid or "player") .. ":" .. slotID .. ":sockets"
-    local cached = GG.enchantGemCache[cacheKey]
-    if cached and cached.emptyCount ~= nil and (GetTime() - cached.timestamp) < (GG.CACHE_DURATION or 30) then
-        return cached.emptyCount
-    end
-
-    scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
-    scanTooltip:ClearLines()
-
-    -- For inspected players, use hyperlink; for player use inventory
-    if guid and guid ~= UnitGUID("player") then
-        local itemLink = GG.GetItemLinkByGUID(guid, slotID)
-        if not itemLink then return 0 end
-        scanTooltip:SetHyperlink(itemLink)
-    else
-        scanTooltip:SetInventoryItem("player", slotID)
-    end
-
-    local emptyCount = 0
-    local hasSocketBonus = false
-
-    for i = 1, scanTooltip:NumLines() do
-        local line = _G["ItemComparisonScanTooltipTextLeft" .. i]
-        if line then
-            local text = line:GetText()
-            if text then
-                -- First check if item has socket bonus (means it has sockets)
-                if text:find("Socket Bonus:") then
-                    hasSocketBonus = true
-                end
-
-                -- Check for socket types (Red/Yellow/Blue/Meta Socket)
-                if text:find("Socket") and (text:find("Red") or text:find("Yellow") or
-                   text:find("Blue") or text:find("Meta")) then
-
-                    -- Socket is filled if next line contains a gem name
-                    local nextLine = _G["ItemComparisonScanTooltipTextLeft" .. (i + 1)]
-                    if nextLine then
-                        local nextText = nextLine:GetText()
-                        local r, g, b = nextLine:GetTextColor()
-
-                        -- Gems are usually shown with colored text
-                        -- If next line is empty or is another socket, then this socket is empty
-                        if not nextText or nextText == "" or
-                           nextText:find("Socket") or nextText:find("Socket Bonus") then
-                            emptyCount = emptyCount + 1
-                        end
-                    else
-                        -- No next line means empty socket
-                        emptyCount = emptyCount + 1
-                    end
-                end
-            end
-        end
-    end
-
-    -- Store in cache
-    local cacheKey = (guid or "player") .. ":" .. slotID .. ":sockets"
-    GG.enchantGemCache[cacheKey] = {
-        emptyCount = emptyCount,
-        timestamp = GetTime()
-    }
-
-    return emptyCount
-end
-
 -- Slots that should typically have enchants in TBC
 local enchantableSlots = {
     1,  -- Head - Arcanum (Cenarion Expedition, Sha'tar, etc.)

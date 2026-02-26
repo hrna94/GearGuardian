@@ -105,6 +105,14 @@ local function UpdateSlotBorder(slotFrame)
             end
         end
 
+        -- Check meta gem requirements (only for head slot)
+        if GG.GetConfig("metaGemCheck") and not showWarning and slotID == 1 then
+            local metaActive = GG.CheckMetaGemRequirements(UnitGUID("player"))
+            if metaActive == false then
+                showWarning = true
+            end
+        end
+
         if showWarning then
             slotFrame.warningIcon:Show()
         else
@@ -198,7 +206,8 @@ function GG.UpdateInspectSlot(slotFrame)
 
         if inspectedGUID and GG.GetConfig("gemCheck") and not showWarning then
             local _, invTime = GG.CI:GetLastCacheTime(inspectedGUID)
-            if invTime > 0 then -- Only check if we have inspect data
+            -- Wait at least 1.5s after cache to ensure gem data is complete
+            if invTime > 0 and (GetTime() - invTime) > 1.5 then
                 local emptySocketCount = GG.GetEmptySocketCount(slotID, inspectedGUID)
                 if emptySocketCount > 0 then
                     showWarning = true
@@ -281,7 +290,16 @@ function GG.SetupInspectFrame()
             if not GG.inspectedUnit then
                 GG.inspectedUnit = targetUnit
             end
-            ScheduleInspectUpdate(0.8)
+            -- Initial update with longer delay to allow LibClassicInspector to cache data
+            ScheduleInspectUpdate(2.0)
+
+            -- Second update after additional delay to catch late-loading gem data
+            C_Timer.After(4.0, function()
+                if GG.inspectedUnit then
+                    UpdateAllInspectSlots()
+                    GG.UpdateInspectAverageILevelDisplay()
+                end
+            end)
         end
     end)
 
@@ -294,8 +312,16 @@ function GG.SetupInspectFrame()
     if InspectFrame then
         InspectFrame:HookScript("OnShow", function(self)
             GG.inspectedUnit = self.unit or "target"
-            -- OPTIMIZED: Single scheduled update
-            ScheduleInspectUpdate(0.8)
+            -- OPTIMIZED: Single scheduled update with longer delay for gem data
+            ScheduleInspectUpdate(2.0)
+
+            -- Second update to catch late-loading gem data
+            C_Timer.After(4.0, function()
+                if GG.inspectedUnit then
+                    UpdateAllInspectSlots()
+                    GG.UpdateInspectAverageILevelDisplay()
+                end
+            end)
         end)
 
         InspectFrame:HookScript("OnHide", function()

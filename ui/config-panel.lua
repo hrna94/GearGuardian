@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Configuration Panel UI
     Author: Sluck
-    Version: 2.5
+    Version: 2.6
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 --]]
@@ -61,7 +61,7 @@ title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 -- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 version:SetPoint("LEFT", title, "RIGHT", 5, -2)
-version:SetText("|cff888888V. 2.5|r")
+version:SetText("|cff888888V. 2.6|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -96,8 +96,9 @@ local featureLabels = {
     comparison = "Stat Comparison",
     averageILevel = "GearScore & Average iLevel Display",
     enchantCheck = "Enchant Check Warnings",
-    gemCheck = "Gem Socket Warnings (Coming soon)",
+    gemCheck = "Gem Socket Warnings",
     bagHighlight = "Bag Upgrade Highlighting (Coming soon)",
+    metaGemCheck = "Meta Gem Requirement Check (Coming soon)",
     setBonusTracking = "Set Bonus Tracking (Coming soon)",
     dualSpecSupport = "Dual Spec Support (Coming soon)"
 }
@@ -109,6 +110,7 @@ local featureDescriptions = {
     averageILevel = "Display GS + iLvl on character & inspect frames",
     enchantCheck = "Yellow warning icon for missing enchants",
     gemCheck = "Yellow warning icon for empty sockets",
+    metaGemCheck = "Warning icon if meta gem requirements not met",
     bagHighlight = "Highlight better gear upgrades in your bags",
     setBonusTracking = "Track and display tier set bonuses",
     dualSpecSupport = "Show comparison for both talent specs"
@@ -165,7 +167,8 @@ local function CreateCheckbox(featureName, label, desc, yOffset, anchorPoint)
 
         -- Apply changes immediately
         if featureName == "qualityBorders" or featureName == "itemLevel" or
-           featureName == "enchantCheck" or featureName == "gemCheck" then
+           featureName == "enchantCheck" or featureName == "gemCheck" or
+           featureName == "metaGemCheck" then
             GG.UpdateAllSlots()
         end
 
@@ -210,6 +213,9 @@ currentY = currentY - 28
 CreateCheckbox("enchantCheck", featureLabels.enchantCheck, featureDescriptions.enchantCheck, currentY)
 currentY = currentY - 45
 
+CreateCheckbox("gemCheck", featureLabels.gemCheck, featureDescriptions.gemCheck, currentY)
+currentY = currentY - 45
+
 -- TOOLTIPS & COMPARISON
 CreateSectionHeader("Tooltips & Comparison", currentY)
 currentY = currentY - 28
@@ -223,7 +229,7 @@ currentY = currentY - 28
 
 CreateCheckbox("bagHighlight", featureLabels.bagHighlight, featureDescriptions.bagHighlight, currentY)
 currentY = currentY - 35
-CreateCheckbox("gemCheck", featureLabels.gemCheck, featureDescriptions.gemCheck, currentY)
+CreateCheckbox("metaGemCheck", featureLabels.metaGemCheck, featureDescriptions.metaGemCheck, currentY)
 currentY = currentY - 35
 CreateCheckbox("setBonusTracking", featureLabels.setBonusTracking, featureDescriptions.setBonusTracking, currentY)
 currentY = currentY - 35
