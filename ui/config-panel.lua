@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Configuration Panel UI
     Author: Sluck
-    Version: 2.6
+    Version: 2.7
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 --]]
@@ -61,7 +61,7 @@ title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 -- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 version:SetPoint("LEFT", title, "RIGHT", 5, -2)
-version:SetText("|cff888888V. 2.6|r")
+version:SetText("|cff888888V. 2.7|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -97,6 +97,7 @@ local featureLabels = {
     averageILevel = "GearScore & Average iLevel Display",
     enchantCheck = "Enchant Check Warnings",
     gemCheck = "Gem Socket Warnings",
+    enchantSuggestions = "Enchant Suggestions in Tooltips",
     bagHighlight = "Bag Upgrade Highlighting (Coming soon)",
     metaGemCheck = "Meta Gem Requirement Check (Coming soon)",
     setBonusTracking = "Set Bonus Tracking (Coming soon)",
@@ -110,6 +111,7 @@ local featureDescriptions = {
     averageILevel = "Display GS + iLvl on character & inspect frames",
     enchantCheck = "Yellow warning icon for missing enchants",
     gemCheck = "Yellow warning icon for empty sockets",
+    enchantSuggestions = "Show recommended enchants for your spec in item tooltips",
     metaGemCheck = "Warning icon if meta gem requirements not met",
     bagHighlight = "Highlight better gear upgrades in your bags",
     setBonusTracking = "Track and display tier set bonuses",
@@ -214,6 +216,9 @@ CreateCheckbox("enchantCheck", featureLabels.enchantCheck, featureDescriptions.e
 currentY = currentY - 45
 
 CreateCheckbox("gemCheck", featureLabels.gemCheck, featureDescriptions.gemCheck, currentY)
+currentY = currentY - 45
+
+CreateCheckbox("enchantSuggestions", featureLabels.enchantSuggestions, featureDescriptions.enchantSuggestions, currentY)
 currentY = currentY - 45
 
 -- TOOLTIPS & COMPARISON

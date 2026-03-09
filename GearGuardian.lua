@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.6
+    Version: 2.7
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -81,6 +81,9 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         GG.ExportGear("player")
     elseif msg == "minimap" then
         GG.ToggleMinimapButton()
+    elseif msg == "version" or msg == "v" then
+        -- Manual version check
+        GG.CheckVersion()
     elseif msg == "showconfig" or msg == "sc" then
         -- Show current config values
         print("|cff00ff00GearGuardian Config:|r")
@@ -263,6 +266,7 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         print("/gg reset - Reset GS/iLevel frames to default positions")
         print("/gg export - Export your gear to text (for sharing)")
         print("/gg minimap - Toggle minimap button on/off")
+        print("/gg version - Check for addon updates")
         print("/gg showconfig - Show current feature settings")
         print("/gg debug - Debug enchant/gem checking (yourself)")
         print("/gg debuggems - Debug gem detection with detailed info")
@@ -322,6 +326,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.InitMinimapButton()
         end)
 
-        print("|cff00ff00GearGuardian v2.5|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.7|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)

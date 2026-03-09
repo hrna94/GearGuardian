@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.6** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.7** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -14,11 +14,17 @@
 
 ### 🛡️ Enchant & Gem Monitoring
 - Yellow warning icons (⚠️) on items missing enchants or containing empty gem sockets
-- **NEW in 2.6:** Meta gem requirement check - warns if meta gem is inactive
+- Meta gem requirement check - warns if meta gem is inactive
 - Works on **YOUR character AND inspected targets**
 - Perfect for raid leaders checking team readiness
 - Detects all TBC enchants (Head, Shoulders, Legs, Chest, Weapons, etc.)
 - Automatically validates meta gem color requirements (e.g., "2 red + 2 blue")
+
+### 💡 Enchant Suggestions
+- **NEW in 2.7:** Hover over any enchantable item to see recommended enchants for your spec
+- Spec-aware suggestions (tank, healer, caster, physical DPS)
+- Shows up to 3 best options with source (reputation/profession requirements)
+- Supports all enchantable slots: Head, Shoulders, Chest, Legs, Back, Weapons, Feet, Wrists, Hands
 
 ### 📊 GearScore System
 - Professional GearScore calculation for TBC Classic
@@ -62,7 +68,11 @@ When you inspect another player, you see:
 - `/gg reset` - Reset GS/iLevel frames to default positions
 - `/gg export` - Export your gear to text (for sharing/recruitment)
 - `/gg minimap` - Toggle minimap button on/off
+- `/gg version` - Check for addon updates (compares with groupmates)
 - `/gg debug` - Debug enchant/gem checking
+- `/gg debuggems` - Debug gem detection with detailed info
+- `/gg debugmeta` - Debug meta gem requirements
+- `/gg debuginspect` - Debug inspect target enchants
 
 ### Minimap Button
 - **NEW in 2.6:** Click the minimap button for quick access
@@ -78,6 +88,7 @@ Open the configuration panel with `/gg` to customize:
 - GearScore & Average iLevel
 - Enchant Check
 - Gem Check
+- Enchant Suggestions in Tooltips
 
 ## Technical Details
 
@@ -87,25 +98,31 @@ Version 2.2 features a complete code refactoring:
 ```
 GearGuardian/
 ├── core/
-│   ├── init.lua          - Namespace and library initialization
-│   ├── helpers.lua       - Helper functions
-│   └── config.lua        - Configuration system
+│   ├── init.lua               - Namespace and library initialization
+│   ├── helpers.lua            - Helper functions
+│   └── config.lua             - Configuration system
 ├── modules/
-│   ├── enchants.lua      - Enchant and gem checking
-│   ├── gearscore.lua     - GearScore calculation
-│   ├── itemlevel.lua     - Item level calculation and display
-│   ├── comparison.lua    - Stat weights and item comparison
-│   └── borders.lua       - Quality borders and slot updates
+│   ├── enchants.lua           - Enchant checking and detection
+│   ├── gems.lua               - Gem socket detection
+│   ├── gearscore.lua          - GearScore calculation
+│   ├── itemlevel.lua          - Item level calculation and display
+│   ├── comparison.lua         - Stat weights and item comparison
+│   ├── borders.lua            - Quality borders and slot updates
+│   ├── export.lua             - Gear export to text
+│   ├── minimap.lua            - Minimap button
+│   ├── metagems.lua           - Meta gem requirement check
+│   ├── versioncheck.lua       - Version check via addon messages
+│   └── enchantsuggestions.lua - Enchant suggestions in tooltips
 ├── ui/
-│   ├── config-panel.lua  - Configuration GUI
-│   └── tooltips.lua      - Tooltip integration
-├── Libs/                 - Required libraries
+│   ├── config-panel.lua       - Configuration GUI
+│   └── tooltips.lua           - Tooltip integration
+├── Libs/                      - Required libraries
 │   ├── LibStub
 │   ├── CallbackHandler-1.0
 │   ├── LibDetours-1.0
 │   └── LibClassicInspector
-├── GearGuardian.lua      - Main file with events and slash commands
-└── GearGuardian.toc      - TOC file
+├── GearGuardian.lua           - Main file with events and slash commands
+└── GearGuardian.toc           - TOC file
 ```
 
 ### Dependencies
@@ -120,7 +137,12 @@ All dependencies are included in the addon.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
 
-### Version 2.6 (2026-02-11)
+### Version 2.7 (2026-03-09)
+- Added Enchant Suggestions - hover over items to see spec-appropriate enchant recommendations
+- Added Version Check system - auto-notifies when a groupmate has a newer version (`/gg version`)
+- Enchant Suggestions toggle added to configuration panel
+
+### Version 2.6 (2026-02-26)
 - Added Export Gear String (`/gg export`) - copy your gear to text for sharing
 - Added Minimap Button - quick access with left/right-click menus
 - Added Meta Gem Requirement Check - warns if meta gem is inactive

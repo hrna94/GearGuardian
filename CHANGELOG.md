@@ -1,6 +1,31 @@
 # GearGuardian Changelog
 
-## Version 2.6 (2026-02-11)
+## Version 2.7 (2026-03-09)
+
+### New Features
+
+**1. Enchant Suggestions in Tooltips**
+- Hover over any enchantable item to see recommended enchants for your specialization
+- Spec-aware: shows different suggestions for tanks, healers, casters, and physical DPS
+- Supports all enchantable slots: Head, Shoulders, Chest, Legs, Back, Weapons (Main Hand), Feet, Wrists, Hands
+- Shows up to 3 best options per slot with source info (reputation/profession requirements)
+- Only shows suggestions on YOUR character panel (not on inspect frame)
+- Togglable via config panel or `/gg showconfig`
+
+**2. Version Check System**
+- `/gg version` command broadcasts your version to party/raid/guild
+- Automatically notifies once per session if a groupmate has a newer version
+- Shows who has the newer version so you know where to get the update
+- Also broadcasts on login and when joining a group
+
+**Technical Improvements:**
+- New modules: `versioncheck.lua`, `enchantsuggestions.lua`
+- Added `enchantSuggestions` config key (default: enabled)
+- Enchant Suggestions checkbox added to config panel under "Inspection & Warnings"
+
+---
+
+## Version 2.6 (2026-02-26)
 
 ### New Features
 
