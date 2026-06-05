@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.7
+    Version: 2.8
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -89,6 +89,8 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         print("|cff00ff00GearGuardian Config:|r")
         print("Enchant Check: " .. (GG.GetConfig("enchantCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print("Gem Check: " .. (GG.GetConfig("gemCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Socket Bonus: " .. (GG.GetConfig("socketBonus") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        print("Temp Enchant: " .. (GG.GetConfig("tempEnchant") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print("Meta Gem Check: " .. (GG.GetConfig("metaGemCheck") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print("Quality Borders: " .. (GG.GetConfig("qualityBorders") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print("Item Level: " .. (GG.GetConfig("itemLevel") and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
@@ -300,6 +302,12 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
         if GG.ClearEnchantGemCache then
             GG.ClearEnchantGemCache()
         end
+        if GG.ClearSocketBonusCache then
+            GG.ClearSocketBonusCache()
+        end
+        if GG.ClearTempEnchantCache then
+            GG.ClearTempEnchantCache()
+        end
     elseif event == "PLAYER_TALENT_UPDATE" then
         -- Clear spec cache when talents change (OPTIMIZATION)
         if GG.ClearSpecCache then
@@ -326,6 +334,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.InitMinimapButton()
         end)
 
-        print("|cff00ff00GearGuardian v2.7|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.8|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)

@@ -281,15 +281,20 @@ function GG.ShowMetaGemWarning(slotFrame, slotID, guid)
         warning:SetPoint("BOTTOMRIGHT", slotFrame, "BOTTOMRIGHT", 2, -2)
         slotFrame.metaWarning = warning
 
-        -- Tooltip
-        slotFrame:SetScript("OnEnter", function(self)
+        -- Hook into existing OnEnter without overwriting
+        local originalOnEnter = slotFrame:GetScript("OnEnter")
+        slotFrame:SetScript("OnEnter", function(self, ...)
+            if originalOnEnter then originalOnEnter(self, ...) end
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:AddLine("|cffFFFF00Meta Gem Inactive!|r")
             GameTooltip:AddLine("|cffFF0000" .. message .. "|r")
             GameTooltip:Show()
         end)
 
-        slotFrame:SetScript("OnLeave", function(self)
+        -- Hook into existing OnLeave without overwriting
+        local originalOnLeave = slotFrame:GetScript("OnLeave")
+        slotFrame:SetScript("OnLeave", function(self, ...)
+            if originalOnLeave then originalOnLeave(self, ...) end
             GameTooltip:Hide()
         end)
     end

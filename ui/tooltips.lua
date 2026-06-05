@@ -119,11 +119,12 @@ local function OnTooltipSetItem(tooltip)
                 local scoreDiff = newItemScore - equippedScore
                 local iLevelDiff = (newItemLevel or 0) - equippedLevel
 
-                -- Show comparison for this slot
+                -- Show comparison for this slot (protect against division by zero)
+                local pctText = equippedScore > 0 and string.format("%.1f%%", (scoreDiff / equippedScore) * 100) or ""
                 if scoreDiff > 0 then
-                    tooltip:AddLine(string.format("%s: |cff00ff00+%.1f score (%.1f%%)|r", slotName, scoreDiff, (scoreDiff/equippedScore)*100), 1, 1, 1)
+                    tooltip:AddLine(string.format("%s: |cff00ff00+%.1f score %s|r", slotName, scoreDiff, pctText), 1, 1, 1)
                 elseif scoreDiff < 0 then
-                    tooltip:AddLine(string.format("%s: |cffff0000%.1f score (%.1f%%)|r", slotName, scoreDiff, (scoreDiff/equippedScore)*100), 1, 1, 1)
+                    tooltip:AddLine(string.format("%s: |cffff0000%.1f score %s|r", slotName, scoreDiff, pctText), 1, 1, 1)
                 else
                     tooltip:AddLine(string.format("%s: |cffffff00Same score|r", slotName), 1, 1, 1)
                 end
@@ -156,10 +157,12 @@ local function OnTooltipSetItem(tooltip)
             local scoreDiff = newItemScore - equippedScore
             local iLevelDiff = (newItemLevel or 0) - equippedLevel
 
+            -- Protect against division by zero
+            local pctText = equippedScore > 0 and string.format("(%.1f%%)", (scoreDiff / equippedScore) * 100) or ""
             if scoreDiff > 0 then
-                tooltip:AddLine(string.format("|cff00ff00UPGRADE: +%.1f score (%.1f%%)|r", scoreDiff, (scoreDiff/equippedScore)*100), 1, 1, 1)
+                tooltip:AddLine(string.format("|cff00ff00UPGRADE: +%.1f score %s|r", scoreDiff, pctText), 1, 1, 1)
             elseif scoreDiff < 0 then
-                tooltip:AddLine(string.format("|cffff0000DOWNGRADE: %.1f score (%.1f%%)|r", scoreDiff, (scoreDiff/equippedScore)*100), 1, 1, 1)
+                tooltip:AddLine(string.format("|cffff0000DOWNGRADE: %.1f score %s|r", scoreDiff, pctText), 1, 1, 1)
             else
                 tooltip:AddLine("|cffffff00SAME score|r", 1, 1, 1)
             end

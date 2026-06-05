@@ -105,6 +105,21 @@ local function UpdateSlotBorder(slotFrame)
             end
         end
 
+        -- Check socket bonus (NEW v2.8)
+        if GG.GetConfig("socketBonus") and not showWarning then
+            local bonusWarning = GG.CheckSocketBonusWarning(slotID)
+            if bonusWarning and not bonusWarning.isActive then
+                showWarning = true
+            end
+        end
+
+        -- Check temporary enchants on weapons (NEW v2.8)
+        if GG.GetConfig("tempEnchant") and not showWarning then
+            if GG.ShouldWarnTempEnchant(slotID) then
+                showWarning = true
+            end
+        end
+
         -- Check meta gem requirements (only for head slot)
         if GG.GetConfig("metaGemCheck") and not showWarning and slotID == 1 then
             local metaActive = GG.CheckMetaGemRequirements(UnitGUID("player"))
@@ -210,6 +225,17 @@ function GG.UpdateInspectSlot(slotFrame)
             if invTime > 0 and (GetTime() - invTime) > 1.5 then
                 local emptySocketCount = GG.GetEmptySocketCount(slotID, inspectedGUID)
                 if emptySocketCount > 0 then
+                    showWarning = true
+                end
+            end
+        end
+
+        -- Check socket bonus on inspected target (NEW v2.8)
+        if inspectedGUID and GG.GetConfig("socketBonus") and not showWarning then
+            local _, invTime = GG.CI:GetLastCacheTime(inspectedGUID)
+            if invTime > 0 and (GetTime() - invTime) > 1.5 then
+                local bonusWarning = GG.CheckSocketBonusWarning(slotID, inspectedGUID)
+                if bonusWarning and not bonusWarning.isActive then
                     showWarning = true
                 end
             end

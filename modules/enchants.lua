@@ -29,30 +29,20 @@ function GG.ClearEnchantGemCache()
 end
 
 -- Parse enchant ID from itemLink (TBC format)
--- Format: |Hitem:itemID:enchantID:suffixID:uniqueID:gem1:gem2:gem3:gem4:level|h[ItemName]|h
+-- TBC itemLink: |Hitem:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID:level|h[name]|h
+-- parts[1]="item", [2]=itemID, [3]=enchantID, [4-7]=gems
 local function GetEnchantIDFromLink(itemLink)
     if not itemLink then return 0 end
 
-    -- Extract the item string from the link
-    local _, _, itemString = string.find(itemLink, "|H(.+)|h")
+    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
     if not itemString then return 0 end
 
-    -- Split by colons INCLUDING empty strings
+    -- Split by colons, preserving empty strings
     local parts = {}
-    local currentPos = 1
-    local colonPos = string.find(itemString, ":", currentPos)
-
-    while colonPos do
-        -- Add part before colon (can be empty string)
-        table.insert(parts, string.sub(itemString, currentPos, colonPos - 1))
-        currentPos = colonPos + 1
-        colonPos = string.find(itemString, ":", currentPos)
+    for match in string.gmatch(itemString .. ":", "([^:]*):") do
+        table.insert(parts, match)
     end
-    -- Add last part
-    table.insert(parts, string.sub(itemString, currentPos))
 
-    -- parts[1] = "item"
-    -- parts[2] = itemID
     -- parts[3] = enchantID (can be empty string if no enchant)
     if parts[3] and parts[3] ~= "" then
         local enchantID = tonumber(parts[3])
@@ -63,56 +53,86 @@ local function GetEnchantIDFromLink(itemLink)
 end
 
 -- Parse gem IDs from itemLink (TBC format)
+-- TBC itemLink: |Hitem:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID:level|h[name]|h
+-- parts[1]="item", [2]=itemID, [3]=enchantID, [4-7]=gems, [8+]=other
 local function GetGemIDsFromLink(itemLink)
     if not itemLink then return {} end
 
-    local _, _, itemString = string.find(itemLink, "|H(.+)|h")
+    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
     if not itemString then return {} end
 
-    -- Split by colons INCLUDING empty strings
+    -- Split by colons, preserving empty strings
     local parts = {}
-    local currentPos = 1
-    local colonPos = string.find(itemString, ":", currentPos)
-
-    while colonPos do
-        table.insert(parts, string.sub(itemString, currentPos, colonPos - 1))
-        currentPos = colonPos + 1
-        colonPos = string.find(itemString, ":", currentPos)
+    local pos = 1
+    for match in string.gmatch(itemString .. ":", "([^:]*):") do
+        table.insert(parts, match)
     end
-    table.insert(parts, string.sub(itemString, currentPos))
 
-    -- parts[6] to parts[9] are gem slots (empty string if no gem)
+    -- Gem slots are at indices 4-7 (gem1 through gem4)
     local gems = {}
-    for i = 6, 9 do
-        if parts[i] and parts[i] ~= "" then
+    for i = 4, 7 do
+        if parts[i] and parts[i] ~= "" and parts[i] ~= "0" then
             local gemID = tonumber(parts[i])
-            table.insert(gems, gemID or 0)
+            if gemID and gemID > 0 then
+                table.insert(gems, gemID)
+            end
         end
     end
 
     return gems
 end
 
--- Count empty sockets by checking if item has socket bonus but gems are 0
+-- Extract item ID from hyperlink
+local function GetItemIDFromHyperlink(itemLink)
+    if not itemLink then return nil end
+    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
+    if not itemString then return nil end
+    local parts = {}
+    for part in string.gmatch(itemString, "[^:]+") do
+        table.insert(parts, part)
+    end
+    return tonumber(parts[1])
+end
+
+-- Count empty sockets by parsing gem IDs from itemLink
 local function CountEmptySocketsFromLink(itemLink)
     if not itemLink then return 0 end
 
-    -- Get item info to check if it has sockets
-    local itemID = GG.GetItemInfoFromHyperlink(itemLink)
+    local itemID = GetItemIDFromHyperlink(itemLink)
     if not itemID then return 0 end
 
-    -- Parse gem IDs
+    -- Parse gem IDs from the link (indices 3-6 in TBC format: itemID:enchantID:gem1:gem2:gem3:gem4)
     local gems = GetGemIDsFromLink(itemLink)
+    local filledCount = #gems
 
-    -- Count empty slots (0 means empty)
-    local emptyCount = 0
-    for _, gemID in ipairs(gems) do
-        if gemID == 0 then
-            emptyCount = emptyCount + 1
+    -- Count total sockets by scanning tooltip
+    local scanTT = CreateFrame("GameTooltip", "GGEnchantScanTooltip", nil, "GameTooltipTemplate")
+    scanTT:SetOwner(UIParent, "ANCHOR_NONE")
+    scanTT:ClearLines()
+    scanTT:SetHyperlink(itemLink)
+
+    local totalSockets = 0
+    for i = 1, scanTT:NumLines() do
+        local line = _G["GGEnchantScanTooltipTextLeft" .. i]
+        if line then
+            local text = line:GetText()
+            if text then
+                local lowerText = string.lower(text)
+                if string.find(lowerText, "socket") then
+                    if string.find(lowerText, "red") or
+                       string.find(lowerText, "yellow") or
+                       string.find(lowerText, "blue") or
+                       string.find(lowerText, "meta") or
+                       string.find(lowerText, "prismatic") then
+                        totalSockets = totalSockets + 1
+                    end
+                end
+            end
         end
     end
 
-    return emptyCount
+    local emptyCount = totalSockets - filledCount
+    return emptyCount > 0 and emptyCount or 0
 end
 
 -- Check if item has enchant (supports inspected players via itemLink parsing)

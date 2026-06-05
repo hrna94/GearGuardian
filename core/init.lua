@@ -23,7 +23,7 @@ GG.CI = LibStub("LibClassicInspector")
 -- ============================================
 
 GG.addonName = addonName
-GG.version = "2.7"
+GG.version = "2.8"
 GG.inspectedUnit = nil  -- Track current inspected unit
 
 -- Spec check interval (in seconds)

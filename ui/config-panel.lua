@@ -61,7 +61,7 @@ title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 -- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 version:SetPoint("LEFT", title, "RIGHT", 5, -2)
-version:SetText("|cff888888V. 2.7|r")
+version:SetText("|cff888888V. 2.8|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -97,6 +97,8 @@ local featureLabels = {
     averageILevel = "GearScore & Average iLevel Display",
     enchantCheck = "Enchant Check Warnings",
     gemCheck = "Gem Socket Warnings",
+    socketBonus = "Socket Bonus Indicator",
+    tempEnchant = "Temporary Enchant Check",
     enchantSuggestions = "Enchant Suggestions in Tooltips",
     bagHighlight = "Bag Upgrade Highlighting (Coming soon)",
     metaGemCheck = "Meta Gem Requirement Check (Coming soon)",
@@ -111,6 +113,8 @@ local featureDescriptions = {
     averageILevel = "Display GS + iLvl on character & inspect frames",
     enchantCheck = "Yellow warning icon for missing enchants",
     gemCheck = "Yellow warning icon for empty sockets",
+    socketBonus = "Warning icon when socket bonus is inactive",
+    tempEnchant = "Warning for missing sharpening stones / wizard oil on weapons",
     enchantSuggestions = "Show recommended enchants for your spec in item tooltips",
     metaGemCheck = "Warning icon if meta gem requirements not met",
     bagHighlight = "Highlight better gear upgrades in your bags",
@@ -170,7 +174,8 @@ local function CreateCheckbox(featureName, label, desc, yOffset, anchorPoint)
         -- Apply changes immediately
         if featureName == "qualityBorders" or featureName == "itemLevel" or
            featureName == "enchantCheck" or featureName == "gemCheck" or
-           featureName == "metaGemCheck" then
+           featureName == "metaGemCheck" or featureName == "socketBonus" or
+           featureName == "tempEnchant" then
             GG.UpdateAllSlots()
         end
 
@@ -178,13 +183,11 @@ local function CreateCheckbox(featureName, label, desc, yOffset, anchorPoint)
             if self:GetChecked() then
                 GG.UpdateAverageILevelDisplay()
             else
-                if GG.avgILevelFrame then GG.avgILevelFrame:Hide() end
-                if GG.inspectAvgILevelFrame then GG.inspectAvgILevelFrame:Hide() end
+                if GG.gsFrame then GG.gsFrame:Hide() end
+                if GG.iLevelFrame then GG.iLevelFrame:Hide() end
+                if GG.inspectGSFrame then GG.inspectGSFrame:Hide() end
+                if GG.inspectILevelFrame then GG.inspectILevelFrame:Hide() end
             end
-        end
-
-        if featureName == "bagHighlight" then
-            GG.UpdateAllBagSlots()
         end
 
         print("|cff00ff00GearGuardian:|r " .. (self:GetChecked() and "Enabled" or "Disabled") .. " - " .. label)
@@ -216,6 +219,12 @@ CreateCheckbox("enchantCheck", featureLabels.enchantCheck, featureDescriptions.e
 currentY = currentY - 45
 
 CreateCheckbox("gemCheck", featureLabels.gemCheck, featureDescriptions.gemCheck, currentY)
+currentY = currentY - 45
+
+CreateCheckbox("socketBonus", featureLabels.socketBonus, featureDescriptions.socketBonus, currentY)
+currentY = currentY - 45
+
+CreateCheckbox("tempEnchant", featureLabels.tempEnchant, featureDescriptions.tempEnchant, currentY)
 currentY = currentY - 45
 
 CreateCheckbox("enchantSuggestions", featureLabels.enchantSuggestions, featureDescriptions.enchantSuggestions, currentY)

@@ -1,6 +1,43 @@
 # GearGuardian Changelog
 
-## Version 2.7 (2026-03-09)
+## Version 2.8 (2026-06-05)
+
+### New Features
+
+**1. Socket Bonus Indicator**
+- Detects if socket bonus is active on items with gem sockets
+- Yellow warning icon on items where socket bonus is NOT active
+- Tooltip shows the socket bonus text (e.g., "Socket Bonus: +4 Agility")
+- Works on both character frame and inspect frame
+- Prismatic/hybrid gems (orange/purple/green) count toward multiple colors
+- Togglable via config panel or `/gg showconfig`
+
+**2. Temporary Enchant Detection**
+- Uses `GetWeaponEnchantInfo()` API (TBC Anniversary supported)
+- Detects sharpening stones, wizard oil, mana oils, and other temporary weapon buffs
+- Yellow warning icon on weapons without temp enchant
+- Shows remaining charges and time in tooltip
+- Works on main hand and off-hand weapons
+- Togglable via config panel or `/gg showconfig`
+
+### Bug Fixes
+
+**Critical:**
+- Fixed `GG.GetItemInfoFromHyperlink()` not existing – was causing Lua errors in `enchants.lua`
+- Fixed config panel referencing non-existent frames (`avgILevelFrame` → `gsFrame`/`iLevelFrame`)
+- Fixed gem parsing in `enchants.lua` – was reading wrong indices (6-9 instead of 4-7)
+- Fixed division by zero crash in tooltip comparison when equipped item has score = 0
+- Fixed meta gem warning overwriting slot OnEnter/OnLeave scripts (now preserves original behavior)
+- Removed reference to non-existent `GG.UpdateAllBagSlots()` function
+
+**Technical:**
+- Standardized item link parsing across all modules (consistent `|Hitem:([^|]+)|h` pattern)
+- Gem slots now correctly parsed at indices 4-7 (TBC format: `itemID:enchantID:gem1:gem2:gem3:gem4`)
+- Enchant ID correctly parsed at index 3
+
+**New Modules:**
+- Added `modules/socketbonus.lua` – Socket bonus detection and display
+- Added `modules/tempenchants.lua` – Temporary enchant detection via `GetWeaponEnchantInfo()`
 
 ### New Features
 
