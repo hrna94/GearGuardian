@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.7** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.8** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -11,37 +11,46 @@
 - No need to open inspect frame - just hover your mouse
 - Works everywhere: world, raids, battlegrounds, dungeons
 - Color-coded display for easy reading
+- Shift+Click to drag and reposition GS/iLevel frames — positions saved between sessions
 
 ### 🛡️ Enchant & Gem Monitoring
 - Yellow warning icons (⚠️) on items missing enchants or containing empty gem sockets
-- Meta gem requirement check - warns if meta gem is inactive
 - Works on **YOUR character AND inspected targets**
 - Perfect for raid leaders checking team readiness
 - Detects all TBC enchants (Head, Shoulders, Legs, Chest, Weapons, etc.)
-- Automatically validates meta gem color requirements (e.g., "2 red + 2 blue")
 
-### 💡 Enchant Suggestions
-- **NEW in 2.7:** Hover over any enchantable item to see recommended enchants for your spec
-- Spec-aware suggestions (tank, healer, caster, physical DPS)
-- Shows up to 3 best options with source (reputation/profession requirements)
-- Supports all enchantable slots: Head, Shoulders, Chest, Legs, Back, Weapons, Feet, Wrists, Hands
+### ⭐ Socket Bonus Indicator (NEW in v2.8)
+- Warning icon (⚠️) when socket bonus is inactive on items with gem sockets
+- Tooltip shows the socket bonus text and which gem colors are missing
+- Supports all TBC socket types: red, yellow, blue, meta, and prismatic
+- Hybrid gems (orange/purple/green) correctly count toward multiple colors
+
+### 🔧 Temporary Enchant Detection (NEW in v2.8)
+- Detects sharpening stones, wizard oil, mana oil on weapons
+- Shows remaining charges and expiration time in tooltip
+- Warning icon for weapons without temp enchant
+- Uses `GetWeaponEnchantInfo()` API
+
+### 🔮 Enchant Suggestions
+- Hover over any enchantable item to see spec-appropriate enchant recommendations
+- Resto Shaman gets healing enchants, Warrior tank gets defense enchants — smart, not generic
+- Shows up to 3 options per slot with source info (reputation/profession requirements)
+- Works on Head, Shoulders, Chest, Legs, Back, Weapons, Boots, Bracers, Gloves
 
 ### 📊 GearScore System
 - Professional GearScore calculation for TBC Classic
 - Color-coded tiers: gray/white/green/blue/purple/orange
 - Displayed on character frame and inspect frame
 - Uses TBC-appropriate formulas (400 points per tier)
-- Shift+Click to drag and reposition GS/iLevel displays anywhere you want
-  - GS and iLevel frames move independently of each other
-  - Positions are saved per-frame and persist between sessions
-  - Works on both character and inspect frames
-  - Use `/gg reset` to restore default positions
+- Draggable frames — Shift+Click to reposition, saved between sessions
+- Works on both character and inspect frames
 
 ### 🔍 Full Inspect Frame Integration
 When you inspect another player, you see:
-- ✓ Their GearScore and Average Item Level
-- ✓ Missing enchants (yellow warning icons)
-- ✓ Empty gem sockets (yellow warning icons)
+- ✓ Their GearScore and Average Item Level (draggable!)
+- ✓ Missing enchants (yellow ⚠️ icons)
+- ✓ Empty gem sockets (yellow ⚠️ icons)
+- ✓ Socket bonus inactive warnings (yellow ⚠️ icons)
 - ✓ Item quality borders on all their gear
 - ✓ Item levels on each piece
 
@@ -50,9 +59,22 @@ When you inspect another player, you see:
 - Custom stat weights for each class/spec
 - Color-coded comparison tooltips (green for upgrade, red for downgrade)
 
+### 📤 Export Gear String
+- `/gg export` copies a formatted text summary with GearScore, iLvl, and issues
+- Perfect for recruitment applications, Discord sharing, or guild requirement checks
+
+### 🗺️ Minimap Button
+- Quick access button on your minimap
+- Left-click opens config panel, right-click shows quick toggle menu
+- Draggable anywhere around the minimap edge
+
 ### 🎨 Quality Borders
 - Colored glowing borders around equipped items based on quality
 - Works on character frame and inspect frame
+
+### 📋 Version Check
+- `/gg version` broadcasts to party/raid/guild to check for outdated versions
+- Automatic notification when a groupmate is running a newer version
 
 ## Installation
 
@@ -63,19 +85,15 @@ When you inspect another player, you see:
 ## Usage
 
 ### Commands
-- `/gg` or `/gg config` - Open configuration panel
-- `/gg toggle` - Enable/disable addon
-- `/gg reset` - Reset GS/iLevel frames to default positions
-- `/gg export` - Export your gear to text (for sharing/recruitment)
-- `/gg minimap` - Toggle minimap button on/off
-- `/gg version` - Check for addon updates (compares with groupmates)
-- `/gg debug` - Debug enchant/gem checking
-- `/gg debuggems` - Debug gem detection with detailed info
-- `/gg debugmeta` - Debug meta gem requirements
-- `/gg debuginspect` - Debug inspect target enchants
+- `/gg` or `/gg config` — Open configuration panel
+- `/gg toggle` — Enable/disable addon
+- `/gg reset` — Reset frame positions to defaults
+- `/gg export` — Export your gear to text (for sharing)
+- `/gg minimap` — Toggle minimap button on/off
+- `/gg version` — Check for addon updates
+- `/gg showconfig` — Show current feature settings
 
 ### Minimap Button
-- **NEW in 2.6:** Click the minimap button for quick access
 - Left-click: Open config panel
 - Right-click: Quick menu with feature toggles
 - Drag to reposition around minimap
@@ -85,16 +103,16 @@ Open the configuration panel with `/gg` to customize:
 - Quality Borders
 - Item Level Display
 - Gear Comparison
-- GearScore & Average iLevel
+- GearScore & Average iLevel Display
 - Enchant Check
 - Gem Check
+- **Socket Bonus Indicator** (NEW!)
+- **Temporary Enchant Check** (NEW!)
 - Enchant Suggestions in Tooltips
 
 ## Technical Details
 
 ### Modular Code Structure
-Version 2.2 features a complete code refactoring:
-
 ```
 GearGuardian/
 ├── core/
@@ -102,12 +120,14 @@ GearGuardian/
 │   ├── helpers.lua            - Helper functions
 │   └── config.lua             - Configuration system
 ├── modules/
+│   ├── borders.lua            - Quality borders and slot updates
+│   ├── itemlevel.lua          - Item level calculation and display
 │   ├── enchants.lua           - Enchant checking and detection
 │   ├── gems.lua               - Gem socket detection
 │   ├── gearscore.lua          - GearScore calculation
-│   ├── itemlevel.lua          - Item level calculation and display
 │   ├── comparison.lua         - Stat weights and item comparison
-│   ├── borders.lua            - Quality borders and slot updates
+│   ├── socketbonus.lua        - Socket bonus indicator (NEW v2.8)
+│   ├── tempenchants.lua       - Temporary enchant detection (NEW v2.8)
 │   ├── export.lua             - Gear export to text
 │   ├── minimap.lua            - Minimap button
 │   ├── metagems.lua           - Meta gem requirement check
@@ -137,51 +157,48 @@ All dependencies are included in the addon.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
 
+### Version 2.8 (2026-06-05)
+- **NEW:** Socket Bonus Indicator — warning when socket bonus is inactive
+- **NEW:** Temporary Enchant Detection — sharpening stones, wizard oil via GetWeaponEnchantInfo()
+- **FIXED:** GetItemInfoFromHyperlink() not existing (Lua error)
+- **FIXED:** Config panel referencing non-existent frame names
+- **FIXED:** Gem parsing wrong indices (6-9 → 4-7, correct TBC format)
+- **FIXED:** Division by zero in tooltip comparison
+- **FIXED:** Meta gem warning overwriting slot OnEnter/OnLeave scripts
+- **REMOVED:** Reference to non-existent UpdateAllBagSlots()
+
 ### Version 2.7 (2026-03-09)
-- Added Enchant Suggestions - hover over items to see spec-appropriate enchant recommendations
-- Added Version Check system - auto-notifies when a groupmate has a newer version (`/gg version`)
+- Added Enchant Suggestions — hover over items to see spec-appropriate enchant recommendations
+- Added Version Check system — auto-notifies when a groupmate has a newer version (`/gg version`)
 - Enchant Suggestions toggle added to configuration panel
 
 ### Version 2.6 (2026-02-26)
-- Added Export Gear String (`/gg export`) - copy your gear to text for sharing
-- Added Minimap Button - quick access with left/right-click menus
-- Added Meta Gem Requirement Check - warns if meta gem is inactive
-- Gem Socket Check now confirmed functional in TBC (moved from "Coming Soon")
-- All features configurable in settings panel and minimap menu
+- Added Export Gear String (`/gg export`)
+- Added Minimap Button — quick access with left/right-click menus
+- Added Meta Gem Requirement Check
+- Gem Socket Check confirmed functional in TBC
 
 ### Version 2.5 (2026-02-11)
-- Fixed iLevel frame disappearing or misplaced after drag (position reference bug from v2.4)
-- GS and iLevel frames are now fully independent (drag each separately)
-- Added `/gg reset` command to restore default frame positions
+- Fixed iLevel frame disappearing or misplaced after drag
+- GS and iLevel frames are now fully independent
+- Added `/gg reset` command
 
 ### Version 2.4 (2026-02-06)
 - Added draggable GS & iLevel displays (Shift+Click to drag)
 - Positions saved per-frame and persist between sessions
-- Frames automatically follow parent when it moves
-- Fixed frame level for inspect frames to stay above 3D models
 
 ### Version 2.3 (2026-02-03)
-- Major performance optimization update
-- Implemented intelligent cache systems (70-80% faster)
-- Optimized GearScore and iLevel calculations
-- Timer optimization for inspect flow
+- Major performance optimization — intelligent cache system (70-80% faster)
 - Item usability validation (class/armor restrictions)
-- UI improvements and repositioned displays
 
 ### Version 2.2 (2026-01-29)
 - Complete code refactoring into modular structure
-- Fixed inspect frame quality borders on target's items
-- Fixed warning icons for missing enchants/gems on inspected players
-- Fixed item level display on inspected player's items
-- Fixed GearScore and average iLevel display on inspect frame
-- Improved error handling and initialization
+- Fixed inspect frame quality borders, warnings, item level, GS
 
 ### Version 2.1 (2025-01-28)
 - Added LibClassicInspector integration
 - Universal GearScore & iLvl tooltips
 - Enhanced inspect frame with enchant/gem warnings
-- Professional configuration panel with scrolling
-- Yellow warning triangle icons
 
 ### Version 2.0 (2025-01-28)
 - Initial release
@@ -203,7 +220,7 @@ Created by **Sluck**
 
 ## License
 
-Copyright (c) 2025 Sluck. All Rights Reserved.
+Copyright (c) 2025-2026 Sluck. All Rights Reserved.
 
 This addon and all its contents are protected by copyright law.
 You may use this addon for personal use only.
@@ -211,4 +228,5 @@ Redistribution, modification, or commercial use is prohibited without explicit p
 
 ## Support
 
-If you encounter any issues or have suggestions, please open an issue on GitHub.
+If you encounter any issues or have suggestions, please open an issue on GitHub:
+https://github.com/hrna94/GearGuardian/issues
