@@ -212,7 +212,7 @@ function GG.UpdateAverageILevelDisplay()
 
         local bg = GG.gsFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
-        bg:SetColorTexture(0, 0, 0, 0.8)
+        GG.gsFrame.bg = bg
 
         local gsLabel = GG.gsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         gsLabel:SetPoint("LEFT", GG.gsFrame, "LEFT", 2, 0)
@@ -241,7 +241,7 @@ function GG.UpdateAverageILevelDisplay()
 
         local bg = GG.iLevelFrame:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
-        bg:SetColorTexture(0, 0, 0, 0.8)
+        GG.iLevelFrame.bg = bg
 
         local label = GG.iLevelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         label:SetPoint("LEFT", GG.iLevelFrame, "LEFT", 2, 0)
@@ -265,21 +265,27 @@ function GG.UpdateAverageILevelDisplay()
     local playerGUID = UnitGUID("player")
     local gearScore, avgILevel = GG.CalculateGearScoreAndItemLevel(playerGUID)
 
-    -- Display GearScore
+    local gsBgColor = GG.GetCustomColor and GG.GetCustomColor("gsBackground") or {0,0,0,0.8}
+    GG.gsFrame.bg:SetColorTexture(gsBgColor[1], gsBgColor[2], gsBgColor[3], gsBgColor[4])
+    local iBgColor = GG.GetCustomColor and GG.GetCustomColor("iLevelBackground") or {0,0,0,0.8}
+    GG.iLevelFrame.bg:SetColorTexture(iBgColor[1], iBgColor[2], iBgColor[3], iBgColor[4])
+
+    local gsLblColor = GG.GetCustomColor and GG.GetCustomColor("gsLabel") or {1,1,1}
+    GG.gsFrame.gsLabel:SetTextColor(gsLblColor[1], gsLblColor[2], gsLblColor[3])
+
     GG.gsFrame.gsValue:SetText(gearScore)
     local r, g, b = GG.GetGearScoreColor(gearScore)
     GG.gsFrame.gsValue:SetTextColor(r, g, b)
 
-    -- Display iLevel
     GG.iLevelFrame.value:SetText(avgILevel)
     if avgILevel >= 140 then
-        GG.iLevelFrame.value:SetTextColor(1, 0.5, 0) -- Orange (epic tier)
+        GG.iLevelFrame.value:SetTextColor(1, 0.5, 0)
     elseif avgILevel >= 115 then
-        GG.iLevelFrame.value:SetTextColor(0.64, 0.21, 0.93) -- Purple (epic)
+        GG.iLevelFrame.value:SetTextColor(0.64, 0.21, 0.93)
     elseif avgILevel >= 90 then
-        GG.iLevelFrame.value:SetTextColor(0, 0.44, 0.87) -- Blue (rare)
+        GG.iLevelFrame.value:SetTextColor(0, 0.44, 0.87)
     else
-        GG.iLevelFrame.value:SetTextColor(0, 1, 0) -- Green
+        GG.iLevelFrame.value:SetTextColor(0, 1, 0)
     end
 
     GG.gsFrame:Show()

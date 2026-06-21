@@ -9,69 +9,12 @@ if not GG then return end
 -- GEM SOCKET DETECTION
 -- ============================================
 
--- Scan tooltip for gem socket detection
-local scanTooltip = CreateFrame("GameTooltip", "GGGemScanTooltip", nil, "GameTooltipTemplate")
-scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+local scanTooltip = GG.sharedScanTooltip or CreateFrame("GameTooltip", "GGSharedScanTooltip", nil, "GameTooltipTemplate")
 
 -- Cache for gem socket checks (performance optimization)
 GG.gemSocketCache = GG.gemSocketCache or {}
 
--- Split string by delimiter, preserving empty strings
-local function SplitString(str, delimiter)
-    local result = {}
-    local pattern = string.format("([^%s]*)", delimiter)
-    local pos = 1
-
-    for match in string.gmatch(str .. delimiter, pattern) do
-        table.insert(result, match)
-        pos = pos + #match + 1
-    end
-
-    -- Remove last empty element added by the delimiter at the end
-    if #result > 0 and result[#result] == "" then
-        table.remove(result)
-    end
-
-    return result
-end
-
--- Parse itemLink to extract gem IDs
--- TBC itemLink format: |Hitem:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID:level:...|h[name]|h
-local function ParseGemsFromLink(itemLink)
-    if not itemLink then return {} end
-
-    local gems = {}
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-
-    if not itemString then return gems end
-
-    -- Split by colons, preserving empty strings
-    local parts = SplitString(itemString, ":")
-
-    -- TBC itemLink structure:
-    -- [1] = itemID
-    -- [2] = enchantID
-    -- [3] = gem1
-    -- [4] = gem2
-    -- [5] = gem3
-    -- [6] = gem4
-    -- [7+] = other fields (suffixID, uniqueID, level, etc.)
-
-    -- Check gem slots (indices 3-6)
-    for i = 3, 6 do
-        if parts[i] and parts[i] ~= "" and parts[i] ~= "0" then
-            local gemID = tonumber(parts[i])
-            if gemID and gemID > 0 then
-                -- Gem IDs in TBC are typically 5-digit numbers (20000-40000 range)
-                if gemID >= 10000 then
-                    table.insert(gems, gemID)
-                end
-            end
-        end
-    end
-
-    return gems
-end
+local ParseGemsFromLink = GG.GetGemsFromLink
 
 -- Count total sockets from tooltip
 local function CountSocketsFromTooltip(itemLink)
@@ -83,7 +26,7 @@ local function CountSocketsFromTooltip(itemLink)
     local socketCount = 0
 
     for i = 1, scanTooltip:NumLines() do
-        local line = _G["GGGemScanTooltipTextLeft" .. i]
+        local line = _G["GGSharedScanTooltipTextLeft" .. i]
         if line then
             local text = line:GetText()
             if text then
@@ -208,10 +151,8 @@ function GG.DebugGemInfo(slotID, guid)
     local escapedLink = string.gsub(itemLink, "|", "||")
     print("Raw itemLink: " .. escapedLink)
 
-    -- Also show individual parts
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-    if itemString then
-        local parts = SplitString(itemString, ":")
+    local parts = GG.ParseItemString(itemLink)
+    if parts then
         print("ItemLink parts (first 15):")
         for i = 1, math.min(15, #parts) do
             local part = parts[i]

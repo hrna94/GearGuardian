@@ -13,21 +13,47 @@ local GG = GearGuardian
 GG.defaultConfig = {
     enabled = true,
     features = {
-        qualityBorders = true,      -- Colored borders on items
-        itemLevel = true,           -- Show item level numbers
-        comparison = true,          -- Show stat comparison in tooltips
-        averageILevel = true,       -- Show average iLevel on character frame
-        bagHighlight = false,       -- Highlight upgrades in bags (DISABLED - TBC bag API issues)
-        enchantCheck = true,        -- Check for missing enchants
-        gemCheck = true,            -- Check for empty gem sockets
-        socketBonus = false,        -- Check if socket bonus is active
-        enchantSuggestions = true,  -- Show enchant suggestions in tooltips
-        tempEnchant = false,        -- Check temporary weapon enchants (sharpening stones, wizard oil)
-        metaGemCheck = false,       -- Check meta gem requirements (coming soon)
-        setBonusTracking = false,   -- Show tier set bonuses (future)
-        dualSpecSupport = false     -- Support for dual spec (future)
+        qualityBorders = true,
+        itemLevel = true,
+        comparison = true,
+        averageILevel = true,
+        bagHighlight = false,
+        enchantCheck = true,
+        gemCheck = true,
+        socketBonus = false,
+        enchantSuggestions = true,
+        tempEnchant = false,
+        metaGemCheck = false,
+        inspectSummary = true,
+        enchantSources = true,
+        colorCustomization = false,
+        setBonusTracking = false,
+        dualSpecSupport = false
     }
 }
+
+GG.defaultColors = {
+    gsBackground = {0, 0, 0, 0.8},
+    iLevelBackground = {0, 0, 0, 0.8},
+    gsLabel = {1, 1, 1},
+    iLevelLabel = {1, 1, 1},
+}
+
+function GG.GetCustomColor(key)
+    if not GG.GetConfig("colorCustomization") then
+        return GG.defaultColors[key]
+    end
+    if GearGuardianDB and GearGuardianDB.colors and GearGuardianDB.colors[key] then
+        return GearGuardianDB.colors[key]
+    end
+    return GG.defaultColors[key]
+end
+
+function GG.SetCustomColor(key, r, g, b, a)
+    if not GearGuardianDB then GearGuardianDB = {} end
+    if not GearGuardianDB.colors then GearGuardianDB.colors = {} end
+    GearGuardianDB.colors[key] = {r, g, b, a or 1}
+end
 
 -- Initialize saved variables
 function GG.InitializeConfig()
@@ -75,25 +101,3 @@ function GG.SetConfig(feature, value)
     GearGuardianDB.config.features[feature] = value
 end
 
--- All character frame slots
-GG.characterSlots = {
-    "CharacterHeadSlot",
-    "CharacterNeckSlot",
-    "CharacterShoulderSlot",
-    "CharacterBackSlot",
-    "CharacterChestSlot",
-    "CharacterShirtSlot",
-    "CharacterTabardSlot",
-    "CharacterWristSlot",
-    "CharacterHandsSlot",
-    "CharacterWaistSlot",
-    "CharacterLegsSlot",
-    "CharacterFeetSlot",
-    "CharacterFinger0Slot",
-    "CharacterFinger1Slot",
-    "CharacterTrinket0Slot",
-    "CharacterTrinket1Slot",
-    "CharacterMainHandSlot",
-    "CharacterSecondaryHandSlot",
-    "CharacterRangedSlot",
-}

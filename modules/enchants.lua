@@ -9,9 +9,7 @@ if not GG then return end
 -- ENCHANT AND GEM CHECKING
 -- ============================================
 
--- Create reusable tooltip for scanning (must be created early)
-local scanTooltip = CreateFrame("GameTooltip", "ItemComparisonScanTooltip", nil, "GameTooltipTemplate")
-scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+local scanTooltip = GG.sharedScanTooltip or CreateFrame("GameTooltip", "GGSharedScanTooltip", nil, "GameTooltipTemplate")
 
 -- ============================================
 -- CACHE SYSTEM FOR PERFORMANCE
@@ -28,112 +26,22 @@ function GG.ClearEnchantGemCache()
     end
 end
 
--- Parse enchant ID from itemLink (TBC format)
--- TBC itemLink: |Hitem:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID:level|h[name]|h
--- parts[1]="item", [2]=itemID, [3]=enchantID, [4-7]=gems
 local function GetEnchantIDFromLink(itemLink)
     if not itemLink then return 0 end
 
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-    if not itemString then return 0 end
+    local parts = GG.ParseItemString(itemLink)
+    if not parts then return 0 end
 
-    -- Split by colons, preserving empty strings
-    local parts = {}
-    for match in string.gmatch(itemString .. ":", "([^:]*):") do
-        table.insert(parts, match)
-    end
-
-    -- parts[3] = enchantID (can be empty string if no enchant)
-    if parts[3] and parts[3] ~= "" then
-        local enchantID = tonumber(parts[3])
+    -- parts[1]=itemID, parts[2]=enchantID, parts[3-6]=gems
+    if parts[2] and parts[2] ~= "" then
+        local enchantID = tonumber(parts[2])
         return enchantID or 0
     end
 
     return 0
 end
 
--- Parse gem IDs from itemLink (TBC format)
--- TBC itemLink: |Hitem:itemID:enchantID:gem1:gem2:gem3:gem4:suffixID:uniqueID:level|h[name]|h
--- parts[1]="item", [2]=itemID, [3]=enchantID, [4-7]=gems, [8+]=other
-local function GetGemIDsFromLink(itemLink)
-    if not itemLink then return {} end
-
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-    if not itemString then return {} end
-
-    -- Split by colons, preserving empty strings
-    local parts = {}
-    local pos = 1
-    for match in string.gmatch(itemString .. ":", "([^:]*):") do
-        table.insert(parts, match)
-    end
-
-    -- Gem slots are at indices 4-7 (gem1 through gem4)
-    local gems = {}
-    for i = 4, 7 do
-        if parts[i] and parts[i] ~= "" and parts[i] ~= "0" then
-            local gemID = tonumber(parts[i])
-            if gemID and gemID > 0 then
-                table.insert(gems, gemID)
-            end
-        end
-    end
-
-    return gems
-end
-
--- Extract item ID from hyperlink
-local function GetItemIDFromHyperlink(itemLink)
-    if not itemLink then return nil end
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-    if not itemString then return nil end
-    local parts = {}
-    for part in string.gmatch(itemString, "[^:]+") do
-        table.insert(parts, part)
-    end
-    return tonumber(parts[1])
-end
-
--- Count empty sockets by parsing gem IDs from itemLink
-local function CountEmptySocketsFromLink(itemLink)
-    if not itemLink then return 0 end
-
-    local itemID = GetItemIDFromHyperlink(itemLink)
-    if not itemID then return 0 end
-
-    -- Parse gem IDs from the link (indices 3-6 in TBC format: itemID:enchantID:gem1:gem2:gem3:gem4)
-    local gems = GetGemIDsFromLink(itemLink)
-    local filledCount = #gems
-
-    -- Count total sockets by scanning tooltip
-    local scanTT = CreateFrame("GameTooltip", "GGEnchantScanTooltip", nil, "GameTooltipTemplate")
-    scanTT:SetOwner(UIParent, "ANCHOR_NONE")
-    scanTT:ClearLines()
-    scanTT:SetHyperlink(itemLink)
-
-    local totalSockets = 0
-    for i = 1, scanTT:NumLines() do
-        local line = _G["GGEnchantScanTooltipTextLeft" .. i]
-        if line then
-            local text = line:GetText()
-            if text then
-                local lowerText = string.lower(text)
-                if string.find(lowerText, "socket") then
-                    if string.find(lowerText, "red") or
-                       string.find(lowerText, "yellow") or
-                       string.find(lowerText, "blue") or
-                       string.find(lowerText, "meta") or
-                       string.find(lowerText, "prismatic") then
-                        totalSockets = totalSockets + 1
-                    end
-                end
-            end
-        end
-    end
-
-    local emptyCount = totalSockets - filledCount
-    return emptyCount > 0 and emptyCount or 0
-end
+local GetGemIDsFromLink = GG.GetGemsFromLink
 
 -- Check if item has enchant (supports inspected players via itemLink parsing)
 function GG.HasEnchant(slotID, debugMode, guid)
@@ -185,7 +93,7 @@ function GG.HasEnchant(slotID, debugMode, guid)
 
     -- Look for enchant text (must be specific patterns, not just any green text)
     for i = 1, scanTooltip:NumLines() do
-        local line = _G["ItemComparisonScanTooltipTextLeft" .. i]
+        local line = _G["GGSharedScanTooltipTextLeft" .. i]
         if line then
             local text = line:GetText()
             if text then

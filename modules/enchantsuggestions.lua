@@ -270,36 +270,57 @@ function GG.GetEnchantSuggestions(slotID)
     return nil
 end
 
--- Hook into tooltip to show enchant suggestions
+local function ColorizeSource(suggestion)
+    if not GG.GetConfig("enchantSources") then return "|cff88FF88" .. suggestion .. "|r" end
+
+    local enchantPart, sourcePart = suggestion:match("^(.+) %- (.+)$")
+    if not enchantPart or not sourcePart then
+        return "|cff88FF88" .. suggestion .. "|r"
+    end
+
+    local sourceColor
+    if sourcePart:match("Enchanter") or sourcePart:match("Leatherworker") or
+       sourcePart:match("Tailor") or sourcePart:match("Engineer") or
+       sourcePart:match("Blacksmith") or sourcePart:match("crafted") then
+        sourceColor = "|cffFFFF00"
+    elseif sourcePart:match("Exalted") or sourcePart:match("Revered") or
+           sourcePart:match("Honored") or sourcePart:match("Friendly") then
+        sourceColor = "|cff6699FF"
+    elseif sourcePart:match("Vendor") or sourcePart:match("Badge") or
+           sourcePart:match("Gold") then
+        sourceColor = "|cff00FF00"
+    elseif sourcePart:match("Quest") then
+        sourceColor = "|cffCC99FF"
+    else
+        sourceColor = "|cffAAAAAA"
+    end
+
+    return "|cff88FF88" .. enchantPart .. "|r - " .. sourceColor .. sourcePart .. "|r"
+end
+
 local function OnTooltipSetItem(tooltip)
     if not GG.GetConfig("enchantSuggestions") then return end
 
     local _, itemLink = tooltip:GetItem()
     if not itemLink then return end
 
-    -- Only show suggestions on YOUR character panel, not on inspect targets
     local owner = tooltip:GetOwner()
     if not owner then return end
 
-    -- Check if tooltip is from player's character frame
     local isPlayerTooltip = false
     if owner == CharacterFrame or owner == PaperDollFrame then
         isPlayerTooltip = true
     end
 
-    -- Also check if owner is a character slot frame (CharacterHeadSlot, etc.)
     if owner:GetName() and string.find(owner:GetName(), "^Character") then
         isPlayerTooltip = true
     end
 
-    -- Don't show suggestions on inspect frame or other tooltips
     if not isPlayerTooltip then return end
 
-    -- Get slot info
     local _, _, _, _, _, _, _, _, equipSlot = GetItemInfo(itemLink)
     if not equipSlot then return end
 
-    -- Determine slot ID
     local slotID = nil
     if equipSlot == "INVTYPE_HEAD" then slotID = 1
     elseif equipSlot == "INVTYPE_SHOULDER" then slotID = 3
@@ -314,25 +335,18 @@ local function OnTooltipSetItem(tooltip)
     end
 
     if not slotID then return end
-
-    -- Check if item should have enchant and doesn't
     if not GG.ShouldHaveEnchant(slotID) then return end
 
-    -- Check if already enchanted (for equipped items)
-    -- For now, we'll show suggestions for all items that can be enchanted
-    -- You can add logic here to hide if already enchanted
-
-    -- Get suggestions
     local suggestions = GG.GetEnchantSuggestions(slotID)
     if not suggestions then return end
 
-    -- Add to tooltip
     tooltip:AddLine(" ")
-    tooltip:AddLine("|cffFFAA00Enchant Suggestions:|r")
+    tooltip:AddLine("|cffFFAA00Recommended Enchants:|r")
 
     for i, suggestion in ipairs(suggestions) do
-        if i <= 3 then -- Show max 3 suggestions
-            tooltip:AddLine("|cff88FF88• " .. suggestion .. "|r", 1, 1, 1, true)
+        if i <= 3 then
+            local line = string.format("  %d. %s", i, ColorizeSource(suggestion))
+            tooltip:AddLine(line, 1, 1, 1, true)
         end
     end
 end

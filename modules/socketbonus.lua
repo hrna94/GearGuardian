@@ -10,8 +10,7 @@ if not GG then return end
 -- SOCKET BONUS DETECTION
 -- ============================================
 
-local scanTooltip = CreateFrame("GameTooltip", "GGSocketBonusTooltip", nil, "GameTooltipTemplate")
-scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+local scanTooltip = GG.sharedScanTooltip or CreateFrame("GameTooltip", "GGSharedScanTooltip", nil, "GameTooltipTemplate")
 
 -- Cache for socket bonus checks
 GG.socketBonusCache = GG.socketBonusCache or {}
@@ -90,49 +89,34 @@ function GG.GetSocketBonusInfo(itemLink)
     return info
 end
 
--- Check if socket bonus is currently active for an item
 function GG.IsSocketBonusActive(itemLink, requiredColors)
     if not itemLink or not requiredColors then return false end
 
-    -- Parse gems from itemLink
-    local _, _, itemString = string.find(itemLink, "|Hitem:([^|]+)|h")
-    if not itemString then return false end
+    local gems = GG.GetGemsFromLink(itemLink)
 
-    local parts = {}
-    for match in string.gmatch(itemString .. ":", "([^:]*):") do
-        table.insert(parts, match)
-    end
-
-    -- Count gem colors from filled sockets (indices 4-7)
     local gemColors = { red = 0, yellow = 0, blue = 0, meta = 0 }
-    local filledCount = 0
+    local filledCount = #gems
 
-    for i = 4, 7 do
-        if parts[i] and parts[i] ~= "" and parts[i] ~= "0" then
-            local gemID = tonumber(parts[i])
-            if gemID and gemID > 0 then
-                filledCount = filledCount + 1
-                local color = GG.GetGemColor(gemID)
-                if color then
-                    if color == "red" then gemColors.red = gemColors.red + 1
-                    elseif color == "yellow" then gemColors.yellow = gemColors.yellow + 1
-                    elseif color == "blue" then gemColors.blue = gemColors.blue + 1
-                    elseif color == "meta" then gemColors.meta = gemColors.meta + 1
-                    elseif color == "orange" then -- red + yellow
-                        gemColors.red = gemColors.red + 1
-                        gemColors.yellow = gemColors.yellow + 1
-                    elseif color == "purple" then -- red + blue
-                        gemColors.red = gemColors.red + 1
-                        gemColors.blue = gemColors.blue + 1
-                    elseif color == "green" then -- yellow + blue
-                        gemColors.yellow = gemColors.yellow + 1
-                        gemColors.blue = gemColors.blue + 1
-                    elseif color == "prismatic" then -- all colors
-                        gemColors.red = gemColors.red + 1
-                        gemColors.yellow = gemColors.yellow + 1
-                        gemColors.blue = gemColors.blue + 1
-                    end
-                end
+    for _, gemID in ipairs(gems) do
+        local color = GG.GetGemColor(gemID)
+        if color then
+            if color == "red" then gemColors.red = gemColors.red + 1
+            elseif color == "yellow" then gemColors.yellow = gemColors.yellow + 1
+            elseif color == "blue" then gemColors.blue = gemColors.blue + 1
+            elseif color == "meta" then gemColors.meta = gemColors.meta + 1
+            elseif color == "orange" then
+                gemColors.red = gemColors.red + 1
+                gemColors.yellow = gemColors.yellow + 1
+            elseif color == "purple" then
+                gemColors.red = gemColors.red + 1
+                gemColors.blue = gemColors.blue + 1
+            elseif color == "green" then
+                gemColors.yellow = gemColors.yellow + 1
+                gemColors.blue = gemColors.blue + 1
+            elseif color == "prismatic" then
+                gemColors.red = gemColors.red + 1
+                gemColors.yellow = gemColors.yellow + 1
+                gemColors.blue = gemColors.blue + 1
             end
         end
     end
@@ -153,7 +137,6 @@ function GG.IsSocketBonusActive(itemLink, requiredColors)
     return filledCount >= totalSockets
 end
 
--- Helper: determine gem color from gem ID (reuse from metagems.lua logic)
 function GG.GetGemColor(gemID)
     if not gemID or gemID == 0 then return nil end
 
@@ -169,18 +152,19 @@ function GG.GetGemColor(gemID)
         return "red"
     end
 
-    if string.find(lowerName, "topaz") or string.find(lowerName, "dawnstone") or
-       string.find(lowerName, "noble topaz") or string.find(lowerName, "golden draenite") then
-        return "yellow"
-    end
-
     if string.find(lowerName, "sapphire") or string.find(lowerName, "star of elune") or
        string.find(lowerName, "empyrean sapphire") or string.find(lowerName, "azure moonstone") then
         return "blue"
     end
 
-    if string.find(lowerName, "amber") or string.find(lowerName, "pyrestone") then
+    if string.find(lowerName, "noble topaz") or string.find(lowerName, "amber") or
+       string.find(lowerName, "pyrestone") or string.find(lowerName, "inscribed") then
         return "orange"
+    end
+
+    if string.find(lowerName, "topaz") or string.find(lowerName, "dawnstone") or
+       string.find(lowerName, "golden draenite") then
+        return "yellow"
     end
 
     if string.find(lowerName, "amethyst") or string.find(lowerName, "nightseye") or

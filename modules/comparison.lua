@@ -67,9 +67,7 @@ GG.StatWeights = {
     }
 }
 
--- Create reusable tooltip for scanning (if not already created)
-local scanTooltip = _G["ItemComparisonScanTooltip"] or CreateFrame("GameTooltip", "ItemComparisonScanTooltip", nil, "GameTooltipTemplate")
-scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+local scanTooltip = GG.sharedScanTooltip or CreateFrame("GameTooltip", "GGSharedScanTooltip", nil, "GameTooltipTemplate")
 
 -- ============================================
 -- CACHE SYSTEM FOR PERFORMANCE
@@ -128,7 +126,7 @@ function GG.IsItemUsableByPlayer(itemLink)
 
     -- Scan tooltip for restrictions
     for i = 1, scanTooltip:NumLines() do
-        local line = _G["ItemComparisonScanTooltipTextLeft" .. i]
+        local line = _G["GGSharedScanTooltipTextLeft" .. i]
         if line then
             local text = line:GetText()
             if text then
@@ -219,7 +217,7 @@ function GG.ParseItemStats(itemLink)
     scanTooltip:SetHyperlink(itemLink)
 
     for i = 1, scanTooltip:NumLines() do
-        local line = _G["ItemComparisonScanTooltipTextLeft" .. i]
+        local line = _G["GGSharedScanTooltipTextLeft" .. i]
         if line then
             local text = line:GetText()
             if text then
@@ -317,10 +315,7 @@ end
 function GG.GetPlayerSpec()
     local currentTime = GetTime()
 
-    -- Initialize variables if needed
     if not GG.lastSpecCheck then GG.lastSpecCheck = 0 end
-    -- OPTIMIZED: Spec rarely changes, cache for 5 minutes instead of 1 second
-    if not GG.SPEC_CHECK_INTERVAL then GG.SPEC_CHECK_INTERVAL = 300 end
 
     -- Return cached value if still valid
     if GG.cachedClass and GG.cachedSpec and ((currentTime - GG.lastSpecCheck) < GG.SPEC_CHECK_INTERVAL) then

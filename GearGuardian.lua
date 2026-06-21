@@ -1,7 +1,7 @@
 --[[
     GearGuardian
     Author: Sluck
-    Version: 2.8
+    Version: 2.9
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 
@@ -84,6 +84,19 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
     elseif msg == "version" or msg == "v" then
         -- Manual version check
         GG.CheckVersion()
+    elseif msg == "colors" then
+        if not GG.GetConfig("colorCustomization") then
+            print("|cffFFFF00GearGuardian:|r Color customization is disabled. Enable it in /gg config first.")
+            return
+        end
+        print("|cff00ff00GearGuardian Colors:|r")
+        print("|cffAAAAAATo set colors, use:|r")
+        print('  |cffFFFFFF/run GG.SetCustomColor("gsBackground", r, g, b, a)|r')
+        print('  |cffFFFFFF/run GG.SetCustomColor("iLevelBackground", r, g, b, a)|r')
+        print('  |cffFFFFFF/run GG.SetCustomColor("gsLabel", r, g, b)|r')
+        print("|cffAAAAAAValues are 0.0-1.0. Example:|r")
+        print('  |cffFFFFFF/run GG.SetCustomColor("gsBackground", 0.1, 0.1, 0.3, 0.9)|r')
+        print("|cff88FF88Reload UI after changing colors.|r")
     elseif msg == "showconfig" or msg == "sc" then
         -- Show current config values
         print("|cff00ff00GearGuardian Config:|r")
@@ -269,6 +282,7 @@ SlashCmdList["GEARGUARDIAN"] = function(msg)
         print("/gg export - Export your gear to text (for sharing)")
         print("/gg minimap - Toggle minimap button on/off")
         print("/gg version - Check for addon updates")
+        print("/gg colors - Color customization help")
         print("/gg showconfig - Show current feature settings")
         print("/gg debug - Debug enchant/gem checking (yourself)")
         print("/gg debuggems - Debug gem detection with detailed info")
@@ -334,6 +348,6 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
             GG.InitMinimapButton()
         end)
 
-        print("|cff00ff00GearGuardian v2.8|r loaded! Type |cffFFFF00/gg|r for options.")
+        print("|cff00ff00GearGuardian v2.9|r loaded! Type |cffFFFF00/gg|r for options.")
     end
 end)

@@ -1,6 +1,6 @@
 # GearGuardian
 
-**Version 2.8** - Your Ultimate TBC Classic Gear Management Companion
+**Version 2.9** - Your Ultimate TBC Classic Gear Management Companion
 
 ![GearGuardian](screenshot.png)
 
@@ -19,6 +19,23 @@
 - Perfect for raid leaders checking team readiness
 - Detects all TBC enchants (Head, Shoulders, Legs, Chest, Weapons, etc.)
 
+### 📊 Inspect Quick Summary Panel (NEW in v2.9)
+- Compact summary box at the top of the Inspect Frame showing gear readiness at a glance
+- Displays: Enchanted X/Y, Gems X/Y, Socket Bonus X/Y active, GearScore, iLvl
+- Color-coded by completion percentage: green (100%), yellow (75-99%), orange (50-74%), red (<50%)
+- Lists specific missing enchants and empty sockets with slot names
+- Toggle on/off in config panel — enabled by default
+
+### 🔮 Enchant Suggestions + Source Lookup (IMPROVED in v2.9)
+- Hover over any enchantable item to see spec-appropriate enchant recommendations
+- Resto Shaman gets healing enchants, Warrior tank gets defense enchants — smart, not generic
+- Shows up to 3 options per slot with **color-coded source types**:
+  - Yellow = profession-crafted (Enchanting, Leatherworking, Tailoring)
+  - Blue = reputation reward (Exalted/Revered factions)
+  - Green = vendor-purchased
+  - Purple = quest reward
+- Works on Head, Shoulders, Chest, Legs, Back, Weapons, Boots, Bracers, Gloves
+
 ### ⭐ Socket Bonus Indicator (NEW in v2.8)
 - Warning icon (⚠️) when socket bonus is inactive on items with gem sockets
 - Tooltip shows the socket bonus text and which gem colors are missing
@@ -31,11 +48,10 @@
 - Warning icon for weapons without temp enchant
 - Uses `GetWeaponEnchantInfo()` API
 
-### 🔮 Enchant Suggestions
-- Hover over any enchantable item to see spec-appropriate enchant recommendations
-- Resto Shaman gets healing enchants, Warrior tank gets defense enchants — smart, not generic
-- Shows up to 3 options per slot with source info (reputation/profession requirements)
-- Works on Head, Shoulders, Chest, Legs, Back, Weapons, Boots, Bracers, Gloves
+### 🎨 Color Customization (NEW in v2.9)
+- Customize GS/iLevel frame background and label colors via `/gg colors` command
+- Colors stored in SavedVariables, persist between sessions
+- Toggle on/off in config panel — disabled by default
 
 ### 📊 GearScore System
 - Professional GearScore calculation for TBC Classic
@@ -91,6 +107,7 @@ When you inspect another player, you see:
 - `/gg export` — Export your gear to text (for sharing)
 - `/gg minimap` — Toggle minimap button on/off
 - `/gg version` — Check for addon updates
+- `/gg colors` — Color customization help (NEW!)
 - `/gg showconfig` — Show current feature settings
 
 ### Minimap Button
@@ -106,8 +123,12 @@ Open the configuration panel with `/gg` to customize:
 - GearScore & Average iLevel Display
 - Enchant Check
 - Gem Check
-- **Socket Bonus Indicator** (NEW!)
-- **Temporary Enchant Check** (NEW!)
+- Socket Bonus Indicator
+- Temporary Enchant Check
+- Meta Gem Requirement Check
+- **Inspect Quick Summary Panel** (NEW!)
+- **Enchant Suggestions + Source Lookup** (IMPROVED!)
+- **Color Customization** (NEW!)
 - Enchant Suggestions in Tooltips
 
 ## Technical Details
@@ -132,7 +153,8 @@ GearGuardian/
 │   ├── minimap.lua            - Minimap button
 │   ├── metagems.lua           - Meta gem requirement check
 │   ├── versioncheck.lua       - Version check via addon messages
-│   └── enchantsuggestions.lua - Enchant suggestions in tooltips
+│   ├── enchantsuggestions.lua - Enchant suggestions with source lookup
+│   └── inspectsummary.lua     - Inspect quick summary panel (NEW v2.9)
 ├── ui/
 │   ├── config-panel.lua       - Configuration GUI
 │   └── tooltips.lua           - Tooltip integration
@@ -156,6 +178,22 @@ All dependencies are included in the addon.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
+
+### Version 2.9 (2026-06-21)
+- **NEW:** Inspect Quick Summary Panel — compact gear readiness overview on inspect frame
+- **NEW:** Enchant Source Lookup — color-coded source types (profession/reputation/vendor/quest)
+- **NEW:** Color Customization — customize GS/iLevel frame colors via `/gg colors`
+- **NEW:** `/gg colors` slash command
+- **FIXED:** Noble Topaz gem color classification (was yellow, now correctly orange)
+- **FIXED:** Enchant detection reading wrong itemLink index (off-by-one)
+- **FIXED:** Gem socket parsing standardized across all modules (indices 3-6)
+- **FIXED:** Meta gem warning tooltip recursion (chain-wrapping OnEnter/OnLeave)
+- **FIXED:** Inspect frame double-update (4 passes → 2)
+- **FIXED:** Spec cache interval (1s → 300s / 5 min)
+- **FIXED:** 4 separate scan tooltips consolidated into 1 shared instance
+- **FIXED:** `table` variable shadowing in gearscore.lua
+- **FIXED:** Dead code and duplicate `characterSlots` removed
+- **FIXED:** metaGemCheck label no longer shows "Coming soon"
 
 ### Version 2.8 (2026-06-05)
 - **NEW:** Socket Bonus Indicator — warning when socket bonus is inactive

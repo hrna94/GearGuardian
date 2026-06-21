@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Configuration Panel UI
     Author: Sluck
-    Version: 2.7
+    Version: 2.9
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 --]]
@@ -61,7 +61,7 @@ title:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
 -- Version text (next to title)
 local version = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 version:SetPoint("LEFT", title, "RIGHT", 5, -2)
-version:SetText("|cff888888V. 2.8|r")
+version:SetText("|cff888888V. 2.9|r")
 
 -- Description
 local desc = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -100,8 +100,11 @@ local featureLabels = {
     socketBonus = "Socket Bonus Indicator",
     tempEnchant = "Temporary Enchant Check",
     enchantSuggestions = "Enchant Suggestions in Tooltips",
+    metaGemCheck = "Meta Gem Requirement Check",
+    inspectSummary = "Inspect Quick Summary Panel",
+    enchantSources = "Enchant Source Lookup",
+    colorCustomization = "Color Customization",
     bagHighlight = "Bag Upgrade Highlighting (Coming soon)",
-    metaGemCheck = "Meta Gem Requirement Check (Coming soon)",
     setBonusTracking = "Set Bonus Tracking (Coming soon)",
     dualSpecSupport = "Dual Spec Support (Coming soon)"
 }
@@ -117,6 +120,9 @@ local featureDescriptions = {
     tempEnchant = "Warning for missing sharpening stones / wizard oil on weapons",
     enchantSuggestions = "Show recommended enchants for your spec in item tooltips",
     metaGemCheck = "Warning icon if meta gem requirements not met",
+    inspectSummary = "Compact summary box on inspect frame with gear readiness overview",
+    enchantSources = "Show where to obtain each enchant (profession, reputation, vendor)",
+    colorCustomization = "Customize GS/iLevel frame colors and warning colors",
     bagHighlight = "Highlight better gear upgrades in your bags",
     setBonusTracking = "Track and display tier set bonuses",
     dualSpecSupport = "Show comparison for both talent specs"
@@ -171,12 +177,19 @@ local function CreateCheckbox(featureName, label, desc, yOffset, anchorPoint)
 
         GG.SetConfig(featureName, self:GetChecked())
 
-        -- Apply changes immediately
         if featureName == "qualityBorders" or featureName == "itemLevel" or
            featureName == "enchantCheck" or featureName == "gemCheck" or
            featureName == "metaGemCheck" or featureName == "socketBonus" or
            featureName == "tempEnchant" then
             GG.UpdateAllSlots()
+        end
+
+        if featureName == "inspectSummary" then
+            if self:GetChecked() then
+                if GG.UpdateInspectSummary then GG.UpdateInspectSummary() end
+            else
+                if GG.HideInspectSummary then GG.HideInspectSummary() end
+            end
         end
 
         if featureName == "averageILevel" then
@@ -227,7 +240,16 @@ currentY = currentY - 45
 CreateCheckbox("tempEnchant", featureLabels.tempEnchant, featureDescriptions.tempEnchant, currentY)
 currentY = currentY - 45
 
+CreateCheckbox("metaGemCheck", featureLabels.metaGemCheck, featureDescriptions.metaGemCheck, currentY)
+currentY = currentY - 45
+
+CreateCheckbox("inspectSummary", featureLabels.inspectSummary, featureDescriptions.inspectSummary, currentY)
+currentY = currentY - 45
+
 CreateCheckbox("enchantSuggestions", featureLabels.enchantSuggestions, featureDescriptions.enchantSuggestions, currentY)
+currentY = currentY - 45
+
+CreateCheckbox("enchantSources", featureLabels.enchantSources, featureDescriptions.enchantSources, currentY)
 currentY = currentY - 45
 
 -- TOOLTIPS & COMPARISON
@@ -237,13 +259,14 @@ currentY = currentY - 28
 CreateCheckbox("comparison", featureLabels.comparison, featureDescriptions.comparison, currentY)
 currentY = currentY - 45
 
+CreateCheckbox("colorCustomization", featureLabels.colorCustomization, featureDescriptions.colorCustomization, currentY)
+currentY = currentY - 45
+
 -- ADVANCED (Coming Soon)
 CreateSectionHeader("Advanced Features", currentY)
 currentY = currentY - 28
 
 CreateCheckbox("bagHighlight", featureLabels.bagHighlight, featureDescriptions.bagHighlight, currentY)
-currentY = currentY - 35
-CreateCheckbox("metaGemCheck", featureLabels.metaGemCheck, featureDescriptions.metaGemCheck, currentY)
 currentY = currentY - 35
 CreateCheckbox("setBonusTracking", featureLabels.setBonusTracking, featureDescriptions.setBonusTracking, currentY)
 currentY = currentY - 35

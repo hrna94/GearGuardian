@@ -88,13 +88,12 @@ function GG.GetItemGearScore(itemLink)
         itemRarity = 2
     end
 
-    -- Select formula table
-    local table = itemLevel > 120 and GS_Formula["A"] or GS_Formula["B"]
+    local formula = itemLevel > 120 and GS_Formula["A"] or GS_Formula["B"]
 
-    if itemRarity >= 2 and itemRarity <= 4 and table[itemRarity] then
+    if itemRarity >= 2 and itemRarity <= 4 and formula[itemRarity] then
         local scale = 1.8618
         local gearScore = math.floor(
-            ((itemLevel - table[itemRarity].A) / table[itemRarity].B) *
+            ((itemLevel - formula[itemRarity].A) / formula[itemRarity].B) *
             GS_SlotModifiers[slotID] *
             scale *
             qualityScale

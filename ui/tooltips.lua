@@ -1,7 +1,7 @@
 --[[
     GearGuardian - Tooltip Integration
     Author: Sluck
-    Version: 2.7
+    Version: 2.9
 
     Copyright (c) 2025 Sluck. All Rights Reserved.
 --]]

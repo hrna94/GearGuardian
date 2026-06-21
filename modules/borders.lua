@@ -300,6 +300,7 @@ function GG.SetupInspectFrame()
         inspectUpdateTimer = C_Timer.NewTimer(delay or 0.8, function()
             UpdateAllInspectSlots()
             GG.UpdateInspectAverageILevelDisplay()
+            if GG.UpdateInspectSummary then GG.UpdateInspectSummary() end
             inspectUpdateTimer = nil
         end)
     end
@@ -319,11 +320,11 @@ function GG.SetupInspectFrame()
             -- Initial update with longer delay to allow LibClassicInspector to cache data
             ScheduleInspectUpdate(2.0)
 
-            -- Second update after additional delay to catch late-loading gem data
             C_Timer.After(4.0, function()
                 if GG.inspectedUnit then
                     UpdateAllInspectSlots()
                     GG.UpdateInspectAverageILevelDisplay()
+                    if GG.UpdateInspectSummary then GG.UpdateInspectSummary() end
                 end
             end)
         end
@@ -334,35 +335,20 @@ function GG.SetupInspectFrame()
         GG.inspectedUnit = unit
     end)
 
-    -- Hook InspectFrame if it exists
     if InspectFrame then
         InspectFrame:HookScript("OnShow", function(self)
             GG.inspectedUnit = self.unit or "target"
-            -- OPTIMIZED: Single scheduled update with longer delay for gem data
-            ScheduleInspectUpdate(2.0)
-
-            -- Second update to catch late-loading gem data
-            C_Timer.After(4.0, function()
-                if GG.inspectedUnit then
-                    UpdateAllInspectSlots()
-                    GG.UpdateInspectAverageILevelDisplay()
-                end
-            end)
         end)
 
         InspectFrame:HookScript("OnHide", function()
-            -- OPTIMIZED: Immediate cleanup, no unnecessary delay
             GG.inspectedUnit = nil
             if inspectUpdateTimer then
                 inspectUpdateTimer:Cancel()
                 inspectUpdateTimer = nil
             end
-            if GG.inspectGSFrame then
-                GG.inspectGSFrame:Hide()
-            end
-            if GG.inspectILevelFrame then
-                GG.inspectILevelFrame:Hide()
-            end
+            if GG.inspectGSFrame then GG.inspectGSFrame:Hide() end
+            if GG.inspectILevelFrame then GG.inspectILevelFrame:Hide() end
+            if GG.HideInspectSummary then GG.HideInspectSummary() end
         end)
     end
 
